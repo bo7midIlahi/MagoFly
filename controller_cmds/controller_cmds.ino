@@ -1,10 +1,5 @@
-#include "Communication.h"
-
-//Board adresses for the communication
-#define COLTROLLER_CMD_ADRESS 10
-#define COLTROLLER_LCD_ADRESS 25
-
-static Communication comms(COLTROLLER_CMD_ADRESS);
+#include <Wire.h>
+const byte SLAVE_ADDRESS = 8; // Choose an address for your slave Arduino
 
 //user inputs
 #define LEFT_JOYSTICK_X_PIN A3
@@ -48,6 +43,7 @@ struct DataToSend data_to_send;
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin();
 
   pinMode(LEFT_JOYSTICK_BTN_PIN, INPUT_PULLUP);
   pinMode(RIGHT_JOYSTICK_BTN_PIN, INPUT_PULLUP);
@@ -76,9 +72,6 @@ void setup() {
 }
 
 void loop() {
-  //unsigned long start =  micros();
-
-  //setting the readings
   if (flags.hand_setup==1){
     data_to_send.yaw = analogRead(LEFT_JOYSTICK_X_PIN);
     data_to_send.rth = digitalRead(LEFT_JOYSTICK_BTN_PIN);
@@ -111,16 +104,14 @@ void loop() {
     data_to_send.throtctr = digitalRead(LEFT_JOYSTICK_BTN_PIN);
   }
 
-  //int handMode = digitalRead(SWITCH_HAND_MODE_PIN);
   if (digitalRead(SWITCH_HAND_MODE_PIN)==HIGH) {
     flags.hand_setup *= -1;
   }
-  //int lightEnable = digitalRead(LIGHT_ENABLE_PIN);
+
   if (digitalRead(LIGHT_ENABLE_PIN)==HIGH) {
     flags.lights *= -1;
   }
 
-  //int altitudeControl = digitalRead(ALTITUDE_CONTROL_ENABLE_PIN);
   if (digitalRead(ALTITUDE_CONTROL_ENABLE_PIN)==HIGH) {
     flags.altitude_control *= -1;
   }
@@ -162,31 +153,11 @@ void loop() {
   Serial.print("engineCut: ");
   Serial.println(flags.engine_cut);
 
-  char screen_data[20];
-  //itoa(altitude, altchar, 10);
-  sprintf(screen_data, "%03d,%03d", altitude,data_to_send.throttle);
-  Serial.print("sentding: ");
-  Serial.println(screen_data);
-/*
-  String msgString = String(screen_data);
-  String alt = msgString.substring(0,3);
-  char alttt[4];
-  alt.toCharArray(alttt, 4);
-  //printf(alttt, "%s",alt);
-
-  Serial.print("string: ");
-  Serial.println(alttt);
-*/
-  comms.Transmit(COLTROLLER_LCD_ADRESS,altitude);
-
-  /*for(int i=0; i<1305; i++) {
-    asm volatile("nop");
-  }*/
+  char message[4];
+  sprintf(message,"%d",altitude);
+  Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
+  Wire.write(message); // Send the character array
+  Wire.endTransmission(); // End transmission
 
   delay(75);
-
-  /*unsigned long finished = micros();
-  Serial.print("took ");
-  Serial.print(finished - start);
-  Serial.println("us");*/
 }
