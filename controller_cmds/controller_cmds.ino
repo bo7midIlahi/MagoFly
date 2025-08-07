@@ -75,7 +75,7 @@ void loop() {
   if (flags.hand_setup==1){
     data_to_send.yaw = analogRead(LEFT_JOYSTICK_X_PIN);
     data_to_send.rth = digitalRead(LEFT_JOYSTICK_BTN_PIN);
-    if ((data_to_send.throtctr == 1)) {
+    if ((flags.throttle_change_disable == -1)) {
       if ((analogRead(LEFT_JOYSTICK_Y_PIN)>1000) && (data_to_send.throttle<100)) {
         data_to_send.throttle += 1 ;
       }
@@ -90,7 +90,7 @@ void loop() {
   }else{
     data_to_send.yaw = analogRead(RIGHT_JOYSTICK_X_PIN);
     data_to_send.rth = digitalRead(RIGHT_JOYSTICK_BTN_PIN);
-    if ((data_to_send.throtctr == 1) && (data_to_send.throttle<=100)&&(data_to_send.throttle>=0)) {
+    if ((flags.throttle_change_disable == -1) && (data_to_send.throttle<=100)&&(data_to_send.throttle>=0)) {
       if ((analogRead(RIGHT_JOYSTICK_Y_PIN)>1000)) {
         data_to_send.throttle += 1 ;
       }
@@ -116,6 +116,10 @@ void loop() {
     flags.altitude_control *= -1;
   }
 
+  if (data_to_send.throtctr == 0) {
+    flags.throttle_change_disable *= -1;
+  }
+
   int altitude;
   if (flags.altitude_control == -1) {
     altitude = 999;
@@ -139,6 +143,8 @@ void loop() {
   Serial.println(data_to_send.pitch);
   Serial.print("throtctr: ");
   Serial.println(data_to_send.throtctr);
+  Serial.print("throtctr_change: ");
+  Serial.println(flags.throttle_change_disable);
 
   Serial.print("handMode: ");
   Serial.println(flags.hand_setup);
@@ -153,8 +159,8 @@ void loop() {
   Serial.print("engineCut: ");
   Serial.println(flags.engine_cut);
 
-  char message[4];
-  sprintf(message,"%d",altitude);
+  char message[8];
+  sprintf(message,"%03d,%03d",altitude,data_to_send.throttle);
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
   Wire.write(message); // Send the character array
   Wire.endTransmission(); // End transmission
