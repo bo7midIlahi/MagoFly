@@ -13,18 +13,60 @@ void setup(void) {
   u8g2.begin();
 }
 
+struct ReceivedData {
+  char altitude[4];
+  char throttle[4];
+  char throttle_enable[2];
+};
+
+struct ReceivedData received_Data;
+
+void splitMessage(char message[8]){
+  char * ptr = strtok(message,",");
+  Serial.print("ptr 1 :");
+  Serial.println(ptr);
+  strcpy(received_Data.altitude,ptr);
+  Serial.println(received_Data.altitude);
+
+  ptr = strtok(NULL,",");
+  Serial.print("ptr 2 :");
+  Serial.println(ptr);
+  strcpy(received_Data.throttle,ptr);
+  Serial.println(received_Data.throttle);
+
+  /*ptr = strtok(NULL,",");
+  Serial.print("ptr 3 :");
+  Serial.println(ptr);
+  strcpy(received_Data.throttle_enable,ptr);
+  Serial.println(received_Data.throttle_enable);*/
+}
+
 void receiveEvent(int howMany) {
   int i = 0;
+  char message[8];
   while (Wire.available()) { // Loop while there are bytes available
     char c = Wire.read(); // Read a byte
-    if (i < sizeof(receivedData) - 1) { // Prevent buffer overflow
-      receivedData[i++] = c;
+    if (i < 7) { // Prevent buffer overflow
+      message[i++] = c;
     }
   }
-  receivedData[i] = '\0'; // Null-terminate the received string
+
+  message[7] = '\0'; // Null-terminate the received string
   Serial.print("Received: ");
-  Serial.println(receivedData);
+  Serial.println(message);
+  //splitMessage(message);
+  
+  char * ptr = strtok(message,",");
+  Serial.print("ptr 1 :");
+  Serial.println(ptr);
+  strcpy(received_Data.altitude,ptr);
+
+  ptr = strtok(NULL,",");
+  Serial.print("ptr 2 :");
+  Serial.println(ptr);
+  strcpy(received_Data.throttle,ptr);
 }
+
 
 void drawSmileyFace() {
   u8g2.drawCircle(10, 43, 10);
@@ -75,11 +117,12 @@ void loop(void) {
   u8g2.drawStr(20, 20, "118.2437W");
   
   u8g2.drawStr(0,30,"ALT:");  // write something to the internal memory
-  u8g2.drawStr(20, 30, receivedData);
+  u8g2.drawStr(20, 30, received_Data.altitude);
   
   //FLIGHT DATA
   u8g2.drawStr(78,10,"THR:");  // write something to the internal memory
-  u8g2.drawStr(98, 10, "100%");
+  u8g2.drawStr(98, 10, received_Data.throttle);
+  u8g2.drawStr(113, 10, "%");
 
   u8g2.drawStr(78,20,"SAT:");  // write something to the internal memory
   u8g2.drawStr(98, 20, "12");
