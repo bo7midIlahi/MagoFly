@@ -90,11 +90,11 @@ void loop() {
   }else{
     data_to_send.yaw = analogRead(RIGHT_JOYSTICK_X_PIN);
     data_to_send.rth = digitalRead(RIGHT_JOYSTICK_BTN_PIN);
-    if ((flags.throttle_change_disable == -1) && (data_to_send.throttle<=100)&&(data_to_send.throttle>=0)) {
-      if ((analogRead(RIGHT_JOYSTICK_Y_PIN)>1000)) {
+    if ((flags.throttle_change_disable == -1)) {
+      if ((analogRead(RIGHT_JOYSTICK_Y_PIN)>1000)&& (data_to_send.throttle<100)) {
         data_to_send.throttle += 1 ;
       }
-      if ((analogRead(RIGHT_JOYSTICK_Y_PIN)<100)) {
+      if ((analogRead(RIGHT_JOYSTICK_Y_PIN)<100) &&(data_to_send.throttle>0)) {
         data_to_send.throttle -= 1 ;
       }
     }
@@ -159,8 +159,10 @@ void loop() {
   Serial.print("engineCut: ");
   Serial.println(flags.engine_cut);
 
-  char message[8];
-  sprintf(message,"%03d,%03d",altitude,data_to_send.throttle);
+  char message[17];
+  sprintf(message,"%03d,%03d,%02d,%02d,%02d",altitude,data_to_send.throttle,flags.lights,flags.throttle_change_disable,flags.hand_setup);
+  Serial.print("message to send: ");
+  Serial.println(message);
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
   Wire.write(message); // Send the character array
   Wire.endTransmission(); // End transmission
