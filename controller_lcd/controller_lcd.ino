@@ -147,8 +147,9 @@ void loop(void) {
   u8g2.drawStr(78,20,"SAT:");  // write something to the internal memory
   u8g2.drawStr(98, 20, "12");
   
-  u8g2.drawStr(78,30,"BAT:");  // write something to the internal memory
-  u8g2.drawStr(98, 30, "100%");
+  u8g2.drawStr(78,30,"SPD:");  // write something to the internal memory
+  u8g2.drawStr(98, 30, "100");
+  u8g2.drawStr(111, 30, "kph");
 
   u8g2.drawStr(78,40,"LGT:");  // write something to the internal memory
   if (strcmp(received_Data.lights,"01")==0) {
@@ -159,10 +160,19 @@ void loop(void) {
     Serial.println("received_Data.lights OFF");
   }
 
+  u8g2.drawStr(78, 50, "TMP:");
+  u8g2.drawStr(98, 50, "30.99");
+  u8g2.drawStr(120, 50, "°C");
+
+  u8g2.drawStr(43,40,"X:");
+  u8g2.drawStr(50,40,"-10.99");
+  u8g2.drawStr(43,50,"Y:");
+  u8g2.drawStr(50,50,"-10.99");
+
   //DRAWINGS
   drawSmileyFace();
   drawGPS();
-  drawBattery();
+  //drawBattery();
 
   //BOTTOM ROW
   u8g2.setFont(u8g2_font_squeezed_b7_tr); // choose a suitable font
