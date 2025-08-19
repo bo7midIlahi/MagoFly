@@ -5,9 +5,9 @@
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 
-#include <Adafruit_INA219.h>
-
-Adafruit_INA219 ina219;
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 // Define RX and TX pins for the GPS module
 static const int RXPin = 4, TXPin = 3;
@@ -20,6 +20,10 @@ TinyGPSPlus gps;
 SoftwareSerial ss(RXPin, TXPin);
 
 Adafruit_MPU6050 mpu;
+
+//defining the nRF24L01 Radio
+RF24 radio(8, 9); // CE, CSN
+const byte address[6] = "00001";
 
 struct AccelerometerData{
   float x;
@@ -46,12 +50,13 @@ void setup() {
   Serial.begin(115200);
   mpu.begin();
   ss.begin(GPSBaud);
-  ina219.begin();
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-
-  ina219.setCalibration_16V_400mA();
 }
 
 void loop(){
@@ -70,19 +75,6 @@ void loop(){
   sensors.gps.sattelites_number = gps.satellites.value();
   sensors.gps.speed = gps.speed.kmph();
 
-  //getting ina219 readings
-  float shuntvoltage = 0;
-  float busvoltage = 0;
-  float current_mA = 0;
-  float loadvoltage = 0;
-  float power_mW = 0;
-
-  shuntvoltage = ina219.getShuntVoltage_mV();
-  busvoltage = ina219.getBusVoltage_V();
-  current_mA = ina219.getCurrent_mA();
-  power_mW = ina219.getPower_mW();
-  loadvoltage = busvoltage + (shuntvoltage / 1000);
-
   //printing accelorometer data
   Serial.println("ACCEL: ");
   Serial.println(sensors.accelorometer.x);
@@ -95,15 +87,7 @@ void loop(){
   Serial.println(sensors.gps.latitude);
   Serial.println(sensors.gps.longitude);
   Serial.println(sensors.gps.sattelites_number);
-  Serial.println(gps.date.month());
 
-  //printing ina219 data
-  Serial.print("Bus Voltage:   "); Serial.print(busvoltage); Serial.println(" V");
-  Serial.print("Shunt Voltage: "); Serial.print(shuntvoltage); Serial.println(" mV");
-  Serial.print("Load Voltage:  "); Serial.print(loadvoltage); Serial.println(" V");
-  Serial.print("Current:       "); Serial.print(current_mA); Serial.println(" mA");
-  Serial.print("Power:         "); Serial.print(power_mW); Serial.println(" mW");
-  Serial.println("");
-
-  delay(1000);
+  //sending what's read
+  radio.write(&sensors, sizeof(sensors));
 }
