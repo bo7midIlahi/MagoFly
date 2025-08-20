@@ -2,88 +2,61 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 
-U8G2_ST7920_128X64_F_8080 u8g2(U8G2_R0, 10, 11, 2, 3, 4, 5, 6, 7, /*enable=*/ 8 /* A4 */, /*cs=*/ U8X8_PIN_NONE, /*dc/rs=*/ 9 /* A3 */, /*reset=*/ /*10*/ A1);  // Remember to set R/W to 0 
+U8G2_ST7920_128X64_F_8080 u8g2(U8G2_R0, 10, 11, 2, 3, 4, 5, 6, 7, /*enable=*/ 8, /*cs=*/ U8X8_PIN_NONE, /*dc/rs=*/ 9, /*reset=*/ A1);
+
 const byte SLAVE_ADDRESS = 8;
-char receivedData[32]; // Adjust size as needed
+
+struct AccelerometerData {
+  float x;
+  float y;
+};
+
+struct GPS_Data {
+  float latitude;
+  float longitude;
+  float altitude;
+  float speed;
+  int sattelites_number;
+};
+
+struct sensoryData {
+  AccelerometerData accelorometer;
+  GPS_Data gps;
+  float temperature;
+};
+volatile sensoryData sensors;
+volatile bool sensorsUpdated = false;
+
+struct userInputs {
+  char altitude[4];
+  char throttle[4];
+  char light[3];
+  char throttle_change_disable[3];
+  char hand_setup[3];
+};
+volatile userInputs userIn;
+volatile bool userUpdated = false;
 
 void setup(void) {
-  Wire.begin(SLAVE_ADDRESS); // Join the I2C bus as slave with its address
-  Wire.onReceive(receiveEvent); // Register the receive event handler
+  Wire.begin(SLAVE_ADDRESS);
+  Wire.onReceive(receiveEvent);
   Serial.begin(115200);
   u8g2.begin();
 }
 
-struct ReceivedData {
-  char altitude[4];
-  char throttle[4];
-  char lights[3];
-  char throttle_change[3];
-  char handMode[3];
-};
-
-struct ReceivedData received_Data;
-
-void splitMessage(char message[17]){
-  char * ptr = strtok(message,",");
-  Serial.print("ptr 1 :");
-  Serial.println(ptr);
-  strcpy(received_Data.altitude,ptr);
-  Serial.println(received_Data.altitude);
-
-  ptr = strtok(NULL,",");
-  Serial.print("ptr 2 :");
-  Serial.println(ptr);
-  strcpy(received_Data.throttle,ptr);
-  Serial.println(received_Data.throttle);
-
-  ptr = strtok(NULL,",");
-  Serial.print("ptr 3 :");
-  Serial.println(ptr);
-  strcpy(received_Data.lights,ptr);
-  received_Data.lights[2] = '\0';
-  Serial.println(received_Data.lights);
-
-  ptr = strtok(NULL,",");
-  Serial.print("ptr 4 :");
-  Serial.println(ptr);
-  strcpy(received_Data.throttle_change,ptr);
-  received_Data.throttle_change[2] = '\0';
-  Serial.println(received_Data.throttle_change);
-
-  ptr = strtok(NULL,",");
-  Serial.print("ptr 5 :");
-  Serial.println(ptr);
-  strcpy(received_Data.handMode,ptr);
-  received_Data.handMode[2] = '\0';
-  Serial.println(received_Data.handMode);
-}
-
 void receiveEvent(int howMany) {
-  int i = 0;
-  char message[17];
-  while (Wire.available()) { // Loop while there are bytes available
-    char c = Wire.read(); // Read a byte
-    if (i < 16) { // Prevent buffer overflow
-      message[i++] = c;
-    }
+  if (howMany == sizeof(userIn)) {
+    Wire.readBytes((byte*)&userIn, sizeof(userIn));
+    userUpdated = true;
   }
-
-  message[16] = '\0'; // Null-terminate the received string
-  Serial.print("Received: ");
-  Serial.println(message);
-  splitMessage(message);
-  /*
-  char * ptr = strtok(message,",");
-  Serial.print("ptr 1 :");
-  Serial.println(ptr);
-  strcpy(received_Data.altitude,ptr);
-
-  ptr = strtok(NULL,",");
-  Serial.print("ptr 2 :");
-  Serial.println(ptr);
-  strcpy(received_Data.throttle,ptr);*/
+  else if (howMany == sizeof(sensors)) {
+    Wire.readBytes((byte*)&sensors, sizeof(sensors));
+    sensorsUpdated = true;
+  }
+  else {
+    while (Wire.available()) Wire.read(); // flush buffer
+  }
 }
-
 
 void drawSmileyFace() {
   u8g2.drawCircle(10, 43, 10);
@@ -113,78 +86,115 @@ void drawGPS() {
   u8g2.drawLine(32, 52, 39, 40);
 }
 
-void drawBattery() {
-  u8g2.drawFrame(43, 33, 10, 20);
-  int i=0;
-  while (i<10) {
-    u8g2.drawHLine(45, 50 - (1.7*i), 6);
-    i += 2;
-  }
-}
-
 void loop(void) {
-  u8g2.clearBuffer();         // clear the internal memory
-  u8g2.setFont(u8g2_font_04b_03_tr); // choose a suitable font
+  u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_04b_03_tr);
 
-  //POSITION DATA
-  u8g2.drawStr(0,10,"LAT:");  // write something to the internal memory
-  u8g2.drawStr(20, 10, "35.0522N");
+  char buf[16];
 
-  u8g2.drawStr(0,20,"LON:");  // write something to the internal memory
-  u8g2.drawStr(20, 20, "118.2437W");
-  
-  u8g2.drawStr(0,30,"ALT:");  // write something to the internal memory
-  u8g2.drawStr(20, 30, received_Data.altitude);
-  
-  //FLIGHT DATA
-  u8g2.drawStr(78,10,"THR:");  // write something to the internal memory
-  u8g2.drawStr(98, 10, received_Data.throttle);
-  u8g2.drawStr(113, 10, "%");
-  if (strcmp(received_Data.throttle_change,"01")==0) {
-    u8g2.drawHLine(78, 11, 40);
+  // --- GPS DATA ---
+  u8g2.drawStr(0,10,"LAT:");
+  if (sensorsUpdated) {
+    dtostrf(sensors.gps.latitude, 7, 4, buf);
+    u8g2.drawStr(23, 10, buf);
   }
 
-  u8g2.drawStr(78,20,"SAT:");  // write something to the internal memory
-  u8g2.drawStr(98, 20, "12");
-  
-  u8g2.drawStr(78,30,"SPD:");  // write something to the internal memory
-  u8g2.drawStr(98, 30, "100");
-  u8g2.drawStr(111, 30, "kph");
-
-  u8g2.drawStr(78,40,"LGT:");  // write something to the internal memory
-  if (strcmp(received_Data.lights,"01")==0) {
-    u8g2.drawStr(98, 40, "ON");
-    Serial.println("received_Data.lights ON");
-  }else {
-    u8g2.drawStr(98, 40, "OFF");
-    Serial.println("received_Data.lights OFF");
+  u8g2.drawStr(0,20,"LON:");
+  if (sensorsUpdated) {
+    dtostrf(sensors.gps.longitude, 7, 4, buf);
+    u8g2.drawStr(23, 20, buf);
   }
 
-  u8g2.drawStr(78, 50, "TMP:");
-  u8g2.drawStr(98, 50, "30.99");
-  u8g2.drawStr(120, 50, "°C");
+  u8g2.drawStr(0,30,"ALT:");
+  if (userUpdated) {
+    dtostrf(sensors.gps.altitude, 3, 2, buf);
+    u8g2.drawStr(22, 30, buf);
+    if (strcmp(userIn.altitude,"999")){
+      u8g2.drawStr(39,30,"/");
+      u8g2.drawStr(45,30,userIn.altitude);
+      u8g2.drawStr(60,30,"m");
+    }
+  }
 
+  // --- THROTTLE ---
+  u8g2.drawStr(75,10,"THR:");
+  if (userUpdated) {
+    u8g2.drawStr(95, 10, userIn.throttle);
+    u8g2.drawStr(110, 10, "%");
+    if (strcmp(userIn.throttle_change_disable,"01")==0) {
+      u8g2.drawHLine(75, 11, 40);
+    }
+  }
+
+  // --- SATTELITES --
+  u8g2.drawStr(75,20,"SAT:");
+  if (userUpdated) {
+    dtostrf(sensors.gps.sattelites_number, 2, 0, buf);
+    u8g2.drawStr(95, 20, buf);
+  }
+
+  // --- SPEED ---
+  u8g2.drawStr(75,30,"SPD:");
+  if (userUpdated) {
+    dtostrf(sensors.gps.speed, 2, 2, buf);
+    u8g2.drawStr(95, 30, buf);
+    u8g2.drawStr(114, 30, "kph");
+  }
+
+  // --- LIGHTS ---
+  u8g2.drawStr(75,40,"LGT:");
+  if (userUpdated) {
+    if (strcmp(userIn.light,"01")==0) {
+      u8g2.drawStr(95, 40, "ON");
+    } else {
+      u8g2.drawStr(95, 40, "OFF");
+    }
+  }
+
+  // --- TEMP ---
+  u8g2.drawStr(75, 50, "TMP:");
+  if (sensorsUpdated) {
+    dtostrf(sensors.temperature, 5, 2, buf);
+    u8g2.drawStr(95, 50, buf);
+  }
+
+  // --- ACCEL ---
   u8g2.drawStr(43,40,"X:");
-  u8g2.drawStr(50,40,"-10.99");
+  if (sensorsUpdated) {
+    dtostrf(sensors.accelorometer.x, 5, 2, buf);
+    u8g2.drawStr(50,40, buf);
+  }
   u8g2.drawStr(43,50,"Y:");
-  u8g2.drawStr(50,50,"-10.99");
-
-  //DRAWINGS
-  drawSmileyFace();
-  drawGPS();
-  //drawBattery();
-
-  //BOTTOM ROW
-  u8g2.setFont(u8g2_font_squeezed_b7_tr); // choose a suitable font
-  if(strcmp(received_Data.handMode,"01")==0){
-    u8g2.drawStr(0,64,"LEFT HANDED");  // write something to the internal memory
-    u8g2.drawStr(100, 64, "v0.14");
-  }else {
-    u8g2.drawStr(65,64,"RIGHT HANDED");  // write something to the internal memory
-    u8g2.drawStr(0, 64, "v0.14");
+  if (sensorsUpdated) {
+    dtostrf(sensors.accelorometer.y, 5, 2, buf);
+    u8g2.drawStr(50,50, buf);
   }
 
-  u8g2.sendBuffer();          // transfer internal memory to the display
+  // --- DRAW FACES ---
+  if (((sensors.temperature>45)&&(sensors.temperature<50)) || (sensors.gps.sattelites_number<7)&&(sensors.gps.sattelites_number>3)) {
+    drawNeutralFace();
+  }else if ((sensors.temperature>49) || (sensors.gps.sattelites_number<4)) {
+    drawSadFace();
+  }else {
+    drawSmileyFace();
+  };
+
+  // --- DRAW GPS ---
+  if (sensors.gps.sattelites_number>2) {
+    drawGPS();
+  }
+
+  // --- HAND MODE AND VERSION
+  u8g2.setFont(u8g2_font_squeezed_b7_tr);
+  if(strcmp(userIn.hand_setup,"01")==0){
+    u8g2.drawStr(0,64,"LEFT HANDED");
+    u8g2.drawStr(105, 64, "v0.21");
+  }else {
+    u8g2.drawStr(65,64,"RIGHT HANDED");
+    u8g2.drawStr(0, 64, "v0.2");
+  }
+
+  u8g2.sendBuffer();
 
   delay(75);
 }
