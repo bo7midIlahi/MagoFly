@@ -156,6 +156,7 @@ void loop(void) {
   if (sensorsUpdated) {
     dtostrf(sensors.temperature, 5, 2, buf);
     u8g2.drawStr(95, 50, buf);
+    u8g2.drawStr(117, 50, "C");
   }
 
   // --- ACCEL ---
