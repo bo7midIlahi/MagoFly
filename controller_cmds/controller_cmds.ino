@@ -1,5 +1,34 @@
 #include <Wire.h>
+#include <SPI.h>
+#include <RF24.h>
+#include <nRF24L01.h>
+
 const byte SLAVE_ADDRESS = 8; // Choose an address for your slave Arduino
+
+//nRF24L01
+RF24 radio(8, 9);
+byte addresses[6] = "00001";
+
+struct AccelerometerData{
+  float x;
+  float y;
+};
+
+struct GPS_Data{
+  float latitude;
+  float longitude;
+  float altitude;
+  float speed;
+  int sattelites_number;
+};
+
+struct sensoryData{
+  struct AccelerometerData accelorometer;
+  struct GPS_Data gps;
+  float temperature; // temperature in °C
+};
+
+struct sensoryData sensors;
 
 //user inputs
 #define LEFT_JOYSTICK_X_PIN A3
@@ -41,6 +70,30 @@ struct DataToSend{
 };
 struct DataToSend data_to_send;
 
+struct Converted_nrf_readings {
+  char x_axis[10];
+  char y_axis[10];
+  char temperature[10];
+  char latitude[12];
+  char longitude[12];
+  char altitude[8];
+  char sattelite_numbers[4];
+  char speed[8];
+};
+
+struct Converted_nrf_readings converted_nrf;
+
+void convert(){
+  dtostrf(sensors.temperature, 6, 2, converted_nrf.temperature); 
+  dtostrf(sensors.accelorometer.x, 6, 2, converted_nrf.x_axis); 
+  dtostrf(sensors.accelorometer.y, 6, 2, converted_nrf.y_axis); 
+  dtostrf(sensors.gps.altitude, 5, 2, converted_nrf.altitude); 
+  dtostrf(sensors.gps.longitude, 9, 4, converted_nrf.longitude); 
+  dtostrf(sensors.gps.latitude, 9, 4, converted_nrf.latitude); 
+  dtostrf(sensors.gps.speed, 4, 2, converted_nrf.speed); 
+  dtostrf(sensors.gps.sattelites_number, 2, 0, converted_nrf.sattelite_numbers); 
+}
+
 void setup() {
   Serial.begin(115200);
   Wire.begin();
@@ -69,9 +122,23 @@ void setup() {
   data_to_send.roll = 0;
   data_to_send.pitch = 0;
   data_to_send.throtctr = -1;
+
+  //nrf24
+  radio.begin();
+  radio.openReadingPipe(0,addresses);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
 }
 
 void loop() {
+  if (radio.available()){
+    radio.read(&sensors, sizeof(sensors));
+    convert();
+    Serial.println("Available");
+  }else {
+    Serial.println("NOP");
+  }
+
   if (flags.hand_setup==1){
     data_to_send.yaw = analogRead(LEFT_JOYSTICK_X_PIN);
     data_to_send.rth = digitalRead(LEFT_JOYSTICK_BTN_PIN);
@@ -158,11 +225,26 @@ void loop() {
 
   Serial.print("engineCut: ");
   Serial.println(flags.engine_cut);
-
+  
   char message[17];
   sprintf(message,"%03d,%03d,%02d,%02d,%02d",altitude,data_to_send.throttle,flags.lights,flags.throttle_change_disable,flags.hand_setup);
   Serial.print("message to send: ");
   Serial.println(message);
+  
+  char readings[64];  
+  sprintf(readings, "x,%s,%s,%s,%s,%s,%s,%s,%s", 
+        converted_nrf.x_axis,
+        converted_nrf.y_axis,
+        converted_nrf.temperature,
+        converted_nrf.latitude,
+        converted_nrf.longitude,
+        converted_nrf.altitude,
+        converted_nrf.sattelite_numbers,
+        converted_nrf.speed);
+
+  Serial.print("readings to send: ");
+  Serial.println(readings);
+
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
   Wire.write(message); // Send the character array
   Wire.endTransmission(); // End transmission
