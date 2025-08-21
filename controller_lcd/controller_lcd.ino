@@ -81,11 +81,32 @@ void drawSadFace() {
   u8g2.drawArc(10, 51, 6, 25, 102);
 }
 
-void drawGPS() {
-  u8g2.drawArc(32, 40, 7, 0, 128);
-  u8g2.drawCircle(32, 40, 3);
-  u8g2.drawLine(24, 40, 32, 52);
-  u8g2.drawLine(32, 52, 39, 40);
+void drawGPS(int gpsNumber) {
+  if (gpsNumber>3) {
+    u8g2.drawArc(32, 40, 7, 0, 128);
+    u8g2.drawCircle(32, 40, 3);
+    u8g2.drawLine(24, 40, 32, 52);
+    u8g2.drawLine(32, 52, 39, 40);
+  }else if ((gpsNumber<4) && (gpsNumber>0)) {
+    static bool blink = false;
+    static unsigned long lastToggle = 0;
+    unsigned long now = millis();
+
+    if (now - lastToggle >= 250) {
+      blink = !blink;
+      lastToggle = now;
+    }
+
+    if (blink) {
+      // draw landing icon
+      u8g2.drawArc(32, 40, 7, 0, 128);
+      u8g2.drawCircle(32, 40, 3);
+      u8g2.drawLine(24, 40, 32, 52);
+      u8g2.drawLine(32, 52, 39, 40);
+    }else {
+      asm volatile("NOP");
+    }
+  }
 }
 
 void drawBlinkingLanding() {
@@ -118,7 +139,7 @@ void drawEngineCut() {
   static unsigned long lastToggle = 0;
   unsigned long now = millis();
 
-  if (now - lastToggle >= 1500) {
+  if (now - lastToggle >= 1000) {
     blink = !blink;
     lastToggle = now;
   }
@@ -126,16 +147,44 @@ void drawEngineCut() {
   if (blink) {
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_squeezed_b7_tr);
+    //draws drone frame
     u8g2.drawCircle(30, 10, 10);
+    u8g2.drawLine(30, 3, 30, 15);
+    u8g2.drawPixel(30,18);
+
     u8g2.drawCircle(95, 10, 10);
+    u8g2.drawLine(95, 3, 95, 15);
+    u8g2.drawPixel(95,18);
+
     u8g2.drawCircle(30, 47, 10);
+    u8g2.drawLine(30, 40, 30, 50);
+    u8g2.drawPixel(30,53);
+
     u8g2.drawCircle(95, 47, 10);
+    u8g2.drawLine(95, 40, 95, 50);
+    u8g2.drawPixel(95,53);
+
     u8g2.drawRFrame(43, 20, 40, 20, 5);
     u8g2.drawLine(38, 18, 44, 22);
     u8g2.drawLine(86, 43, 80, 38);
     u8g2.drawLine(38, 40, 45, 38);
     u8g2.drawLine(80, 21, 88, 17);
+    
     u8g2.drawStr(38, 64, "ENGINES OFF");
+
+    /*
+    //draws triangle warning sign
+    u8g2.drawLine(5, 35, 25, 35);
+    u8g2.drawLine(102, 35, 122, 35);
+    u8g2.drawLine(5, 35, 15, 15);
+    u8g2.drawLine(102, 35, 113, 15);
+    u8g2.drawLine(15, 15, 25, 35);
+    u8g2.drawLine(113, 15, 122, 35);
+    u8g2.drawLine(15, 20, 15, 30);
+    u8g2.drawLine(113, 20, 113, 30);
+    u8g2.drawPixel(15,33);
+    u8g2.drawPixel(113,33);
+    */
   }
 }
 
@@ -244,9 +293,10 @@ void loop(void) {
   }
 
   // --- DRAW GPS ---
-  if (sensors.gps.sattelites_number>2) {
+  /*if (sensors.gps.sattelites_number>3) {
     drawGPS();
-  }
+  }*/
+  drawGPS(sensors.gps.sattelites_number);
 
   // --- DRAW LANDING ---
   if (userIn.emergency_landing==1){
@@ -257,7 +307,6 @@ void loop(void) {
   if (userIn.engine_cut==1){
     drawEngineCut();
   }
-
 
   u8g2.sendBuffer();
 
