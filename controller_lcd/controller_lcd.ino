@@ -33,6 +33,8 @@ struct userInputs {
   char light[3];
   char throttle_change_disable[3];
   char hand_setup[3];
+  int emergency_landing;
+  int engine_cut;
 };
 volatile userInputs userIn;
 volatile bool userUpdated = false;
@@ -84,6 +86,57 @@ void drawGPS() {
   u8g2.drawCircle(32, 40, 3);
   u8g2.drawLine(24, 40, 32, 52);
   u8g2.drawLine(32, 52, 39, 40);
+}
+
+void drawBlinkingLanding() {
+  static bool blink = false;
+  static unsigned long lastToggle = 0;
+  unsigned long now = millis();
+
+  // toggle every 500 ms
+  if (now - lastToggle >= 500) {
+    blink = !blink;
+    lastToggle = now;
+  }
+
+  if (blink) {
+    // draw landing icon
+    u8g2.drawLine(61, 5, 61, 15);
+    u8g2.drawLine(65, 5, 65, 15);
+    u8g2.drawLine(61, 5, 65, 5);
+    u8g2.drawLine(61, 15, 58, 12);
+    u8g2.drawLine(65, 15, 68, 12);
+    u8g2.drawLine(68, 12, 70, 14);
+    u8g2.drawLine(58, 12, 56, 14);
+    u8g2.drawLine(56, 14, 63, 21);
+    u8g2.drawLine(70, 14, 63, 21);
+  }
+}
+
+void drawEngineCut() {
+  static bool blink = false;
+  static unsigned long lastToggle = 0;
+  unsigned long now = millis();
+
+  if (now - lastToggle >= 1500) {
+    blink = !blink;
+    lastToggle = now;
+  }
+
+  if (blink) {
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_squeezed_b7_tr);
+    u8g2.drawCircle(30, 10, 10);
+    u8g2.drawCircle(95, 10, 10);
+    u8g2.drawCircle(30, 47, 10);
+    u8g2.drawCircle(95, 47, 10);
+    u8g2.drawRFrame(43, 20, 40, 20, 5);
+    u8g2.drawLine(38, 18, 44, 22);
+    u8g2.drawLine(86, 43, 80, 38);
+    u8g2.drawLine(38, 40, 45, 38);
+    u8g2.drawLine(80, 21, 88, 17);
+    u8g2.drawStr(38, 64, "ENGINES OFF");
+  }
 }
 
 void loop(void) {
@@ -180,11 +233,6 @@ void loop(void) {
     drawSmileyFace();
   };
 
-  // --- DRAW GPS ---
-  if (sensors.gps.sattelites_number>2) {
-    drawGPS();
-  }
-
   // --- HAND MODE AND VERSION
   u8g2.setFont(u8g2_font_squeezed_b7_tr);
   if(strcmp(userIn.hand_setup,"01")==0){
@@ -194,6 +242,22 @@ void loop(void) {
     u8g2.drawStr(65,64,"RIGHT HANDED");
     u8g2.drawStr(0, 64, "v0.2");
   }
+
+  // --- DRAW GPS ---
+  if (sensors.gps.sattelites_number>2) {
+    drawGPS();
+  }
+
+  // --- DRAW LANDING ---
+  if (userIn.emergency_landing==1){
+    drawBlinkingLanding();
+  }
+
+  //--- Draw Engine Cut ---
+  if (userIn.engine_cut==1){
+    drawEngineCut();
+  }
+
 
   u8g2.sendBuffer();
 
