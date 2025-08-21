@@ -37,6 +37,8 @@ struct userInputs {
   char light[3];
   char throttle_change_disable[3];
   char hand_setup[3];
+  int emergency_landing;
+  int engine_cut;
 };
 struct userInputs userIn;
 
@@ -76,6 +78,8 @@ struct DataToSend{
   int roll;
   int pitch;
   int throtctr;
+  int engine_cut;
+  int lights;
 
 };
 struct DataToSend data_to_send;
@@ -218,6 +222,12 @@ void loop() {
   sprintf(userIn.throttle_change_disable,"%02d",flags.throttle_change_disable);
   sprintf(userIn.hand_setup,"%02d",flags.hand_setup);
 
+  //send data to the lcd controller
+  userIn.engine_cut = flags.engine_cut;
+  if (data_to_send.rth==0){
+    flags.emergency_landing *= -1;
+  }
+  userIn.emergency_landing = flags.emergency_landing;
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
   Wire.write((byte*)&userIn, sizeof(userIn)); // Send the character array
   Wire.endTransmission(); // End transmission
