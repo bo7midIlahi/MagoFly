@@ -2,7 +2,15 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 
-U8G2_ST7920_128X64_F_8080 u8g2(U8G2_R0, 10, 11, 2, 3, 4, 5, 6, 7, /*enable=*/ 8, /*cs=*/ U8X8_PIN_NONE, /*dc/rs=*/ 9, /*reset=*/ A1);
+#include <SPI.h>
+#include <RF24.h>
+#include <nRF24L01.h>
+
+//nRF24L01
+RF24 radio(15, 16);
+const byte address[5] = {'F','L','G','H','T'};
+
+U8G2_ST7920_128X64_F_8080 u8g2(U8G2_R0, 10, 17, 2, 3, 4, 5, 6, 7, /*enable=*/ 8, /*cs=*/ U8X8_PIN_NONE, /*dc/rs=*/ 9, /*reset=*/ A1);
 
 const byte SLAVE_ADDRESS = 8;
 
@@ -35,6 +43,9 @@ struct userInputs {
   char hand_setup[3];
   int emergency_landing;
   int engine_cut;
+  int yaw;
+  int pitch;
+  int roll;
 };
 volatile userInputs userIn;
 volatile bool userUpdated = false;
@@ -43,6 +54,12 @@ void setup(void) {
   Wire.begin(SLAVE_ADDRESS);
   Wire.onReceive(receiveEvent);
   Serial.begin(115200);
+  
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
+  
   u8g2.begin();
 }
 
@@ -114,8 +131,8 @@ void drawBlinkingLanding() {
   static unsigned long lastToggle = 0;
   unsigned long now = millis();
 
-  // toggle every 500 ms
-  if (now - lastToggle >= 500) {
+  // toggle every 250 ms
+  if (now - lastToggle >= 250) {
     blink = !blink;
     lastToggle = now;
   }
@@ -293,9 +310,6 @@ void loop(void) {
   }
 
   // --- DRAW GPS ---
-  /*if (sensors.gps.sattelites_number>3) {
-    drawGPS();
-  }*/
   drawGPS(sensors.gps.sattelites_number);
 
   // --- DRAW LANDING ---
@@ -310,5 +324,5 @@ void loop(void) {
 
   u8g2.sendBuffer();
 
-  delay(75);
+  radio.write(&userIn, sizeof(userIn));
 }
