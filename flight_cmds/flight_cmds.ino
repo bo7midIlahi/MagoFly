@@ -21,6 +21,9 @@ struct userInputs {
   char hand_setup[3];
   int emergency_landing;
   int engine_cut;
+  int yaw;
+  int pitch;
+  int roll;
 };
 struct userInputs userIn;
 
