@@ -9,6 +9,7 @@ const byte SLAVE_ADDRESS = 8; // Choose an address for your slave Arduino
 RF24 radio(8, 9);
 byte addresses[6] = "00001";
 
+//strcuture of the reacived data from the nRF24 radio
 struct AccelerometerData{
   float x;
   float y;
@@ -27,8 +28,22 @@ struct sensoryData{
   struct GPS_Data gps;
   float temperature; // temperature in °C
 };
-
 struct sensoryData sensors;
+
+//structure of the user input
+struct userInputs {
+  char altitude[4];
+  char throttle[4];
+  char light[3];
+  char throttle_change_disable[3];
+  char hand_setup[3];
+  int emergency_landing;
+  int engine_cut;
+  int yaw;
+  int pitch;
+  int roll;
+};
+struct userInputs userIn;
 
 //user inputs
 #define LEFT_JOYSTICK_X_PIN A3
@@ -66,33 +81,11 @@ struct DataToSend{
   int roll;
   int pitch;
   int throtctr;
+  int engine_cut;
+  int lights;
 
 };
 struct DataToSend data_to_send;
-
-struct Converted_nrf_readings {
-  char x_axis[10];
-  char y_axis[10];
-  char temperature[10];
-  char latitude[12];
-  char longitude[12];
-  char altitude[8];
-  char sattelite_numbers[4];
-  char speed[8];
-};
-
-struct Converted_nrf_readings converted_nrf;
-
-void convert(){
-  dtostrf(sensors.temperature, 6, 2, converted_nrf.temperature); 
-  dtostrf(sensors.accelorometer.x, 6, 2, converted_nrf.x_axis); 
-  dtostrf(sensors.accelorometer.y, 6, 2, converted_nrf.y_axis); 
-  dtostrf(sensors.gps.altitude, 5, 2, converted_nrf.altitude); 
-  dtostrf(sensors.gps.longitude, 9, 4, converted_nrf.longitude); 
-  dtostrf(sensors.gps.latitude, 9, 4, converted_nrf.latitude); 
-  dtostrf(sensors.gps.speed, 4, 2, converted_nrf.speed); 
-  dtostrf(sensors.gps.sattelites_number, 2, 0, converted_nrf.sattelite_numbers); 
-}
 
 void setup() {
   Serial.begin(115200);
@@ -133,7 +126,6 @@ void setup() {
 void loop() {
   if (radio.available()){
     radio.read(&sensors, sizeof(sensors));
-    convert();
     Serial.println("Available");
   }else {
     Serial.println("NOP");
@@ -225,29 +217,32 @@ void loop() {
 
   Serial.print("engineCut: ");
   Serial.println(flags.engine_cut);
-  
-  char message[17];
-  sprintf(message,"%03d,%03d,%02d,%02d,%02d",altitude,data_to_send.throttle,flags.lights,flags.throttle_change_disable,flags.hand_setup);
-  Serial.print("message to send: ");
-  Serial.println(message);
-  
-  char readings[64];  
-  sprintf(readings, "x,%s,%s,%s,%s,%s,%s,%s,%s", 
-        converted_nrf.x_axis,
-        converted_nrf.y_axis,
-        converted_nrf.temperature,
-        converted_nrf.latitude,
-        converted_nrf.longitude,
-        converted_nrf.altitude,
-        converted_nrf.sattelite_numbers,
-        converted_nrf.speed);
 
-  Serial.print("readings to send: ");
-  Serial.println(readings);
+  //prepare userInput
+  sprintf(userIn.altitude,"%03d",altitude);
+  sprintf(userIn.throttle,"%03d",data_to_send.throttle);
+  sprintf(userIn.light,"%02d",flags.lights);
+  sprintf(userIn.throttle_change_disable,"%02d",flags.throttle_change_disable);
+  sprintf(userIn.hand_setup,"%02d",flags.hand_setup);
+
+  //send data to the lcd controller
+  userIn.engine_cut = flags.engine_cut;
+  if (data_to_send.rth==0){
+    flags.emergency_landing *= -1;
+  }
+  userIn.emergency_landing = flags.emergency_landing;
+  userIn.pitch = data_to_send.pitch;
+  userIn.roll = data_to_send.roll;
+  userIn.yaw = data_to_send.yaw;
 
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
-  Wire.write(message); // Send the character array
+  Wire.write((byte*)&userIn, sizeof(userIn)); // Send the character array
   Wire.endTransmission(); // End transmission
 
+  Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
+  Wire.write((byte*)&sensors, sizeof(sensors)); // Send the character array
+  Wire.endTransmission(); // End transmission
+  
+  Serial.println(sizeof(userIn));
   delay(75);
 }
