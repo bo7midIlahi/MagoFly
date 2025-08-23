@@ -2,9 +2,13 @@
 #include <RF24.h>
 #include <nRF24L01.h>
 
+#include <Wire.h>
+
 // nRF24L01
 RF24 radio(4, 5);
 byte addresses[6] = "FLGHT";  // 5 chars + null = 6 bytes
+
+const byte radio_arduino = 3;
 
 // structure of the user input
 struct userInputs {
@@ -21,9 +25,19 @@ struct userInputs {
 };
 struct userInputs userIn;
 
+void receiveEvent(int howMany) {
+  if (howMany == sizeof(userIn)) {
+    Wire.readBytes((byte*)&userIn, sizeof(userIn));
+    Serial.println("DATA ACQUIRED");
+  }
+}
+
 void setup() {
   Serial.begin(115200);   // UART link
   while (!Serial);        // Wait for serial connection (Pro Micro)
+
+  Wire.begin(radio_arduino);
+  Wire.onReceive(receiveEvent);
 
   // nRF24 setup
   radio.begin();
@@ -37,23 +51,14 @@ void setup() {
 }
 
 void loop() {
-  // Check if enough bytes for a full struct are available on UART
-  if (Serial.available() >= sizeof(userIn)) {
-    Serial.readBytes((byte*)&userIn, sizeof(userIn));  // fill struct
+  bool ok = radio.write(&userIn, sizeof(userIn));
 
-    // flash LED when data received
-    digitalWrite(8, HIGH);
+  // debug output
+  Serial.print("Altitude: ");
+  Serial.println(userIn.altitude);
+  Serial.print("RF24 send: ");
+  Serial.println(ok ? "OK" : "FAILED");
 
-    // forward over RF24
-    bool ok = radio.write(&userIn, sizeof(userIn));
-
-    // debug output
-    Serial.print("Altitude: ");
-    Serial.println(userIn.altitude);
-    Serial.print("RF24 send: ");
-    Serial.println(ok ? "OK" : "FAILED");
-
-    delay(50);
-    digitalWrite(LED_BUILTIN, LOW);
-  }
+  delay(50);
+  
 }
