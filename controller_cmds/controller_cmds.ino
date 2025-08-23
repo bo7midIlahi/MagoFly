@@ -4,6 +4,7 @@
 #include <nRF24L01.h>
 
 const byte SLAVE_ADDRESS = 8; // Choose an address for your slave Arduino
+const byte radio_arduino = 3;
 
 //nRF24L01
 RF24 radio(8, 9);
@@ -234,7 +235,8 @@ void loop() {
   userIn.pitch = data_to_send.pitch;
   userIn.roll = data_to_send.roll;
   userIn.yaw = data_to_send.yaw;
-
+  
+  //SEND DATA TO SHOW ON SCREEN 
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
   Wire.write((byte*)&userIn, sizeof(userIn)); // Send the character array
   Wire.endTransmission(); // End transmission
@@ -242,6 +244,13 @@ void loop() {
   Wire.beginTransmission(SLAVE_ADDRESS); // Start transmission to the slave
   Wire.write((byte*)&sensors, sizeof(sensors)); // Send the character array
   Wire.endTransmission(); // End transmission
+
+  Wire.beginTransmission(radio_arduino); // Start transmission to the slave
+  Wire.write((byte*)&userIn, sizeof(userIn)); // Send the character array
+  Wire.endTransmission(); // End transmission
+
+  //SEND DATA TO ARDUINO MICRO SO IT'LL SENT VIA NRF
+  Serial.write((byte*)&userIn, sizeof(userIn));
   
   Serial.println(sizeof(userIn));
   delay(75);
