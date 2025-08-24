@@ -171,7 +171,16 @@ void loop() {
 }
 */
 
+#include <Servo.h>
+Servo ESC1;
+Servo ESC2;
+Servo ESC3;
+Servo ESC4;
 
+#define MOTOR1LED 15
+#define MOTOR2LED 16
+#define MOTOR3LED 17
+#define MOTOR4LED 18
 
 #include <SPI.h>
 #include <nRF24L01.h>
@@ -195,6 +204,52 @@ struct userInputs {
 };
 struct userInputs userIn;
 
+void calibration(){
+  ESC1.writeMicroseconds(2000);
+  ESC2.writeMicroseconds(2000);
+  ESC3.writeMicroseconds(2000);
+  ESC4.writeMicroseconds(2000);
+
+  delay(3000);
+
+  ESC1.writeMicroseconds(1000);
+  ESC2.writeMicroseconds(1000);
+  ESC3.writeMicroseconds(1000);
+  ESC4.writeMicroseconds(1000);
+
+  delay(3000);
+  Serial.println("DONE CALIBRATION");
+  ledBlink();
+}
+
+void motorTest(){
+  for (int i=0; i<=1000; i+=50) {
+    ESC1.writeMicroseconds(1000 + i);
+    ESC2.writeMicroseconds(1000 + i);
+    ESC3.writeMicroseconds(1000 + i);
+    ESC4.writeMicroseconds(1000 + i);
+
+    Serial.print("INCREASING: ");
+    Serial.println(1000+i);
+  
+    delay(500);
+  }
+
+  delay(2000);
+
+  for (int i=1000; i>=0; i-=50) {
+    ESC1.writeMicroseconds(1000 + i);
+    ESC2.writeMicroseconds(1000 + i);
+    ESC3.writeMicroseconds(1000 + i);
+    ESC4.writeMicroseconds(1000 + i);
+
+    Serial.print("DECREASING: ");
+    Serial.println(1000+i);
+
+    delay(500);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   radio.begin();
@@ -202,6 +257,62 @@ void setup() {
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
   pinMode(2,OUTPUT);
+
+  //attaching ESCs
+  ESC1.attach(3,1000,2000);
+  ESC2.attach(5,1000,2000);
+  ESC3.attach(6,1000,2000);
+  ESC4.attach(9,1000,2000);
+
+  //setup pins
+  pinMode(MOTOR1LED,OUTPUT);
+  pinMode(MOTOR2LED,OUTPUT);
+  pinMode(MOTOR3LED,OUTPUT);
+  pinMode(MOTOR4LED,OUTPUT);
+
+  calibration();
+  //motorTest();
+}
+
+void ledBlink(){
+  digitalWrite(MOTOR1LED,HIGH);
+  digitalWrite(MOTOR2LED,HIGH);
+  digitalWrite(MOTOR3LED,HIGH);
+  digitalWrite(MOTOR4LED,HIGH);
+
+  delay(100);
+
+  digitalWrite(MOTOR1LED,LOW);
+  digitalWrite(MOTOR2LED,LOW);
+  digitalWrite(MOTOR3LED,LOW);
+  digitalWrite(MOTOR4LED,LOW);
+
+  delay(100);
+}
+
+void cutOffEngines(){
+  ESC1.writeMicroseconds(1000);
+  ESC2.writeMicroseconds(1000);
+  ESC3.writeMicroseconds(1000);
+  ESC4.writeMicroseconds(1000);
+  while (1) {
+    ledBlink();
+  }
+}
+
+void emergencyLanding(){
+  int throtle = atoi(userIn.throttle);
+  throtle = map(throtle,0,100,1000,2000);
+  while (throtle>1000) {
+    ESC1.writeMicroseconds(throtle - 100);
+    ESC2.writeMicroseconds(throtle - 100);
+    ESC3.writeMicroseconds(throtle - 100);
+    ESC4.writeMicroseconds(throtle - 100);
+    delay(100);
+
+    throtle -= 100;
+  }
+  cutOffEngines();
 }
 
 void loop() {
@@ -216,12 +327,79 @@ void loop() {
     Serial.println(userIn.roll);
     Serial.println(userIn.yaw);
     Serial.println(userIn.throttle);
-    digitalWrite(2,HIGH);
-  }else {
-    Serial.println("NOP");
-    digitalWrite(2,HIGH);
-    delay(100);
+    Serial.println(userIn.light);
+
+    if (userIn.engine_cut == 1) {
+      cutOffEngines();
+    }
+
+    if (strcmp(userIn.light,"01") == 0) {
+      digitalWrite(MOTOR1LED,HIGH);
+      digitalWrite(MOTOR2LED,HIGH);
+      digitalWrite(MOTOR3LED,HIGH);
+      digitalWrite(MOTOR4LED,HIGH);
+    }else {
+      digitalWrite(MOTOR1LED,LOW);
+      digitalWrite(MOTOR2LED,LOW);
+      digitalWrite(MOTOR3LED,LOW);
+      digitalWrite(MOTOR4LED,LOW);
+    }
+    
+    if (userIn.emergency_landing == 1){
+      emergencyLanding();
+    }
+
+    int yaw = userIn.yaw;
+    int pitch = userIn.pitch;
+    int roll = userIn.roll;
+    int throtle = userIn.throttle;
+    throtle = map(throtle,0,100,1000,2000);
+
+    ESC1.writeMicroseconds(throtle);
+    ESC2.writeMicroseconds(throtle);
+    ESC3.writeMicroseconds(throtle);
+    ESC4.writeMicroseconds(throtle);
+
+    if(yaw > 900){
+      ESC1.writeMicroseconds(throtle-100);
+      ESC2.writeMicroseconds(throtle);
+      ESC3.writeMicroseconds(throtle-100);
+      ESC4.writeMicroseconds(throtle);
+    }
+    if(yaw < 100){
+      ESC1.writeMicroseconds(throtle);
+      ESC2.writeMicroseconds(throtle-100);
+      ESC3.writeMicroseconds(throtle);
+      ESC4.writeMicroseconds(throtle-100);
+    }
+
+    if(roll > 900){
+      ESC1.writeMicroseconds(throtle-100);
+      ESC2.writeMicroseconds(throtle);
+      ESC3.writeMicroseconds(throtle);
+      ESC4.writeMicroseconds(throtle-100);
+    }
+    if(roll < 100) {
+      ESC1.writeMicroseconds(throtle);
+      ESC2.writeMicroseconds(throtle-100);
+      ESC3.writeMicroseconds(throtle-100);
+      ESC4.writeMicroseconds(throtle);
+    }
+
+    if (pitch > 900) {
+      ESC1.writeMicroseconds(throtle-100);
+      ESC2.writeMicroseconds(throtle-100);
+      ESC3.writeMicroseconds(throtle);
+      ESC4.writeMicroseconds(throtle);
+    }
+    if (pitch < 100) {
+      ESC1.writeMicroseconds(throtle);
+      ESC2.writeMicroseconds(throtle);
+      ESC3.writeMicroseconds(throtle-100);
+      ESC4.writeMicroseconds(throtle-100);
+    }
     digitalWrite(2,LOW);
-    delay(100);
+  }else {
+    digitalWrite(2,HIGH);
   }
 }
