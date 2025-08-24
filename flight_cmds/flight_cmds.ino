@@ -1,17 +1,22 @@
-#include <Servo.h>
+/*#include <Servo.h>
 
 #include <SPI.h>
 #include <RF24.h>
 #include <nRF24L01.h>
 
 //nRF24L01
-RF24 radio(14, 15);
-const byte address[5] = {'F','L','G','H','T'};
+RF24 radio(8, 7);
+const byte address[6] = "00010";
 
 Servo ESC1;
 Servo ESC2;
 Servo ESC3;
 Servo ESC4;
+
+#define MOTOR1LED 15
+#define MOTOR2LED 16
+#define MOTOR3LED 17
+#define MOTOR4LED 18
 
 struct userInputs {
   char altitude[4];
@@ -27,11 +32,9 @@ struct userInputs {
 };
 struct userInputs userIn;
 
-#define ledPin 2
-#define bluePin 19
-
 void setup() {
   Serial.begin(115200);
+  pinMode(2,OUTPUT);
 
   ESC1.attach(3,1000,2000);
   ESC2.attach(5,1000,2000);
@@ -60,8 +63,11 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
 
-  pinMode(ledPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
+  //setup pins
+  pinMode(MOTOR1LED,OUTPUT);
+  pinMode(MOTOR2LED,OUTPUT);
+  pinMode(MOTOR3LED,OUTPUT);
+  pinMode(MOTOR4LED,OUTPUT);
 }
 
 void motorTest(){
@@ -94,17 +100,128 @@ void motorTest(){
 
 void loop() {
   if (radio.available()){
-    radio.read(&userIn, sizeof(userIn));
-    Serial.println("GOT DATA");
+    char text[32] = "";
+    radio.read(&text, sizeof(text));
+    Serial.println(text);
+
     digitalWrite(2,HIGH);
-    delay(200);
-    digitalWrite(2,LOW);
-    delay(200);
+
+    digitalWrite(MOTOR1LED,HIGH);
+    digitalWrite(MOTOR2LED,HIGH);
+    digitalWrite(MOTOR3LED,HIGH);
+    digitalWrite(MOTOR4LED,HIGH);
+
+    Serial.println(userIn.altitude);
+    Serial.println(userIn.emergency_landing);
+    Serial.println(userIn.engine_cut);
+    Serial.println(userIn.hand_setup);
+    Serial.println(userIn.pitch);
+    Serial.println(userIn.roll);
+    Serial.println(userIn.yaw);
+    Serial.println(userIn.throttle);
   }else {
     Serial.println("NOPE");
-    digitalWrite(19,HIGH);
+    digitalWrite(2,HIGH);
+    digitalWrite(MOTOR1LED,HIGH);
+    digitalWrite(MOTOR2LED,HIGH);
+    digitalWrite(MOTOR3LED,HIGH);
+    digitalWrite(MOTOR4LED,HIGH);
     delay(200);
-    digitalWrite(19,LOW);
+    digitalWrite(2,LOW);
+    digitalWrite(MOTOR1LED,LOW);
+    digitalWrite(MOTOR2LED,LOW);
+    digitalWrite(MOTOR3LED,LOW);
+    digitalWrite(MOTOR4LED,LOW);
     delay(200);
+  }
+}*/
+
+/*
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+RF24 radio(7, 8); // CE, CSN
+
+const byte address[6] = "00001";
+
+void setup() {
+  Serial.begin(115200);
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
+  pinMode(2,OUTPUT);
+}
+
+void loop() {
+  if (radio.available()) {
+    char text[32] = "";
+    radio.read(&text, sizeof(text));
+    Serial.println(text);
+    digitalWrite(2,HIGH);
+  }else {
+    Serial.println("NOP");
+    digitalWrite(2,HIGH);
+    delay(100);
+    digitalWrite(2,LOW);
+    delay(100);
+  }
+  delay(200);
+}
+*/
+
+
+
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+RF24 radio(7, 8); // CE, CSN
+
+const byte address[6] = "00010";
+
+struct userInputs {
+  char altitude[4];
+  char throttle[4];
+  char light[3];
+  char throttle_change_disable[3];
+  char hand_setup[3];
+  int emergency_landing;
+  int engine_cut;
+  int yaw;
+  int pitch;
+  int roll;
+};
+struct userInputs userIn;
+
+void setup() {
+  Serial.begin(115200);
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.startListening();
+  pinMode(2,OUTPUT);
+}
+
+void loop() {
+  if (radio.available()) {
+    //char text[32] = "";
+    radio.read(&userIn, sizeof(userIn));
+    Serial.println(userIn.altitude);
+    Serial.println(userIn.emergency_landing);
+    Serial.println(userIn.engine_cut);
+    Serial.println(userIn.hand_setup);
+    Serial.println(userIn.pitch);
+    Serial.println(userIn.roll);
+    Serial.println(userIn.yaw);
+    Serial.println(userIn.throttle);
+    digitalWrite(2,HIGH);
+  }else {
+    Serial.println("NOP");
+    digitalWrite(2,HIGH);
+    delay(100);
+    digitalWrite(2,LOW);
+    delay(100);
   }
 }
