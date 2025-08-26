@@ -9,6 +9,7 @@ const byte radio_arduino = 3;
 //nRF24L01
 RF24 radio(8, 9);
 byte addresses[6] = "00001";
+byte addr[6] = "00010";
 
 //strcuture of the reacived data from the nRF24 radio
 struct AccelerometerData{
@@ -119,6 +120,7 @@ void setup() {
 
   //nrf24
   radio.begin();
+  radio.openWritingPipe(addr);
   radio.openReadingPipe(0,addresses);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
@@ -219,6 +221,11 @@ void loop() {
   Serial.print("engineCut: ");
   Serial.println(flags.engine_cut);
 
+  Serial.print("x: ");
+  Serial.println(sensors.accelorometer.x);
+  Serial.print("y: ");
+  Serial.println(sensors.accelorometer.x);
+
   //prepare userInput
   sprintf(userIn.altitude,"%03d",altitude);
   sprintf(userIn.throttle,"%03d",data_to_send.throttle);
@@ -245,13 +252,14 @@ void loop() {
   Wire.write((byte*)&sensors, sizeof(sensors)); // Send the character array
   Wire.endTransmission(); // End transmission
 
+/*
   Wire.beginTransmission(radio_arduino); // Start transmission to the slave
   Wire.write((byte*)&userIn, sizeof(userIn)); // Send the character array
   Wire.endTransmission(); // End transmission
-
-  //SEND DATA TO ARDUINO MICRO SO IT'LL SENT VIA NRF
-  Serial.write((byte*)&userIn, sizeof(userIn));
-  
+*/
+  radio.stopListening();
+  radio.write(&userIn, sizeof(userIn));
+  radio.startListening();
   Serial.println(sizeof(userIn));
   delay(75);
 }
