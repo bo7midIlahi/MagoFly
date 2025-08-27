@@ -134,11 +134,11 @@ void emergencyLanding(){
   int throtle = atoi(userIn.throttle);
   throtle = map(throtle,0,100,1000,2000);
   while (throtle>1000) {
-    ESC1.writeMicroseconds(throtle - 100);
-    ESC2.writeMicroseconds(throtle - 100);
-    ESC3.writeMicroseconds(throtle - 100);
-    ESC4.writeMicroseconds(throtle - 100);
-    delay(1000);
+    ESC1.writeMicroseconds(throtle - 50);
+    ESC2.writeMicroseconds(throtle - 50);
+    ESC3.writeMicroseconds(throtle - 50);
+    ESC4.writeMicroseconds(throtle - 50);
+    delay(1500);
 
     throtle -= 100;
   }
