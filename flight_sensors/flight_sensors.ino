@@ -52,7 +52,7 @@ void setup() {
   ss.begin(GPSBaud);
   radio.begin();
   radio.openWritingPipe(address);
-  radio.setPALevel(RF24_PA_MIN);
+  radio.setPALevel(RF24_PA_MAX);
   radio.stopListening();
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
