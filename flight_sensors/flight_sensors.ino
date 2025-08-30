@@ -10,7 +10,7 @@
 #include <RF24.h>
 
 // Define RX and TX pins for the GPS module
-static const int RXPin = 4, TXPin = 3;
+static const int RXPin = 2, TXPin = 3;
 static const uint32_t GPSBaud = 9600;
 
 // The TinyGPSPlus object
@@ -22,7 +22,7 @@ SoftwareSerial ss(RXPin, TXPin);
 Adafruit_MPU6050 mpu;
 
 //defining the nRF24L01 Radio
-RF24 radio(8, 9); // CE, CSN
+RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
 
 struct AccelerometerData{
