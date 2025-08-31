@@ -4,7 +4,7 @@
 #include <nRF24L01.h>
 
 const byte SLAVE_ADDRESS = 8; // Choose an address for your slave Arduino
-const byte radio_arduino = 3;
+//const byte radio_arduino = 3;
 
 //nRF24L01
 RF24 radio(8, 9);
@@ -124,6 +124,9 @@ void setup() {
   radio.openReadingPipe(0,addresses);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
+
+  //10.5 seconds delay until the display finish showing animation
+  delay(10500);
 }
 
 void loop() {
