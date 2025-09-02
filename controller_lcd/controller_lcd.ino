@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 
+#define BUZZER 13
+
 U8G2_ST7920_128X64_F_8080 u8g2(U8G2_R0, 10, 17, 2, 3, 4, 5, 6, 7, /*enable=*/ 8, /*cs=*/ U8X8_PIN_NONE, /*dc/rs=*/ 9, /*reset=*/ A1);
 
 const byte SLAVE_ADDRESS = 8;
@@ -562,6 +564,13 @@ void loopAnimation(U8G2 &u8g2) {
   }
 }
 
+
+void shortBeep(unsigned int duration=100) {
+  digitalWrite(BUZZER, HIGH);
+  delay(duration);
+  digitalWrite(BUZZER, LOW);
+}
+
 void welcome() {
   loopAnimation(u8g2);
 
@@ -586,7 +595,17 @@ void welcome() {
   u8g2.sendBuffer();
 
   delay(2000);
+  shortBeep();
 }
+/*
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+RF24 radio(14, 15); // CE, CSN
+
+const byte address[6] = "00010";
+*/
 
 void setup(void) {
   Wire.begin(SLAVE_ADDRESS);
@@ -596,8 +615,11 @@ void setup(void) {
   radio.begin();
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MIN);
-  radio.stopListening();
-  */
+  radio.stopListening();*/
+
+  //buzzer pin setup
+  pinMode(BUZZER,OUTPUT);
+
   u8g2.begin();
   welcome();
 }
@@ -687,6 +709,11 @@ void drawBlinkingLanding() {
     u8g2.drawLine(58, 12, 56, 14);
     u8g2.drawLine(56, 14, 63, 21);
     u8g2.drawLine(70, 14, 63, 21);
+
+    //buzzer activate
+    digitalWrite(BUZZER,HIGH);
+  }else {
+    digitalWrite(BUZZER,LOW);
   }
 }
 
@@ -728,6 +755,9 @@ void drawEngineCut() {
     
     u8g2.drawStr(38, 64, "ENGINES OFF");
 
+    //buzzer activate
+    digitalWrite(BUZZER,HIGH);
+
     /*
     //draws triangle warning sign
     u8g2.drawLine(5, 35, 25, 35);
@@ -741,10 +771,16 @@ void drawEngineCut() {
     u8g2.drawPixel(15,33);
     u8g2.drawPixel(113,33);
     */
+  }else{
+    digitalWrite(BUZZER,LOW);
   }
 }
 
-void loop(void) {
+char lastHandMode[3] = "";
+char lastLight[3] = "";
+char lastAltitude[4] = "";
+
+void loop() {
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_04b_03_tr);
 
@@ -772,6 +808,11 @@ void loop(void) {
       u8g2.drawStr(45,30,userIn.altitude);
       u8g2.drawStr(60,30,"m");
     }
+  }
+  //DETECTING CHANGE
+  if (strcmp(userIn.altitude, lastAltitude) != 0) {
+    shortBeep();
+    strcpy(lastAltitude, userIn.altitude);
   }
 
   // --- THROTTLE ---
@@ -807,6 +848,11 @@ void loop(void) {
     } else {
       u8g2.drawStr(95, 40, "OFF");
     }
+  }
+  //DETECTING CHANGE
+  if(strcmp(userIn.light,lastLight) != 0){
+    shortBeep();
+    strcpy(lastLight, userIn.light);
   }
 
   // --- TEMP ---
@@ -847,6 +893,11 @@ void loop(void) {
     u8g2.drawStr(65,64,"RIGHT HANDED");
     u8g2.drawStr(0, 64, "v0.2");
   }
+  //DETECTING CHANGE
+  if(strcmp(userIn.hand_setup,lastHandMode) != 0){
+    shortBeep();
+    strcpy(lastHandMode, userIn.hand_setup);
+  }
 
   // --- DRAW GPS ---
   drawGPS(sensors.gps.sattelites_number);
@@ -860,6 +911,9 @@ void loop(void) {
   if (userIn.engine_cut==1){
     drawEngineCut();
   }
-
+/*
+  const char text[] = "Hello World";
+  radio.write(&text, sizeof(text));
+*/
   u8g2.sendBuffer();
 }
