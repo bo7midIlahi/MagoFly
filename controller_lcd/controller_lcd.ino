@@ -779,6 +779,7 @@ void drawEngineCut() {
 char lastHandMode[3] = "";
 char lastLight[3] = "";
 char lastAltitude[4] = "";
+char lastThrotChange[3] = "";
 
 void loop() {
   u8g2.clearBuffer();
@@ -823,6 +824,11 @@ void loop() {
     if (strcmp(userIn.throttle_change_disable,"01")==0) {
       u8g2.drawHLine(75, 11, 40);
     }
+  }
+  //DETECTING CHANGE
+  if (strcmp(userIn.throttle_change_disable, lastThrotChange) != 0) {
+    shortBeep();
+    strcpy(lastThrotChange, userIn.throttle_change_disable);
   }
 
   // --- SATTELITES --
