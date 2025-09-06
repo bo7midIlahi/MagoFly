@@ -60,6 +60,12 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 
 ### Drone wiring
 ![Drone schematic](circuits_schematics/Drone_circuit.png)
+  - Fix the polarity of each motors so the rotation direction of each motor matches the fellowing picture:
+     <img
+    src="img/motors_orientation.jpg"
+    alt="drone"
+    width=100%
+      />
   - solder each of them on a seperate soldering board.
   - change the SSID and the PASSWORD on the [`camera script`](camera/CameraWebServer/CameraWebServer.ino) to your wifi' ssid and password:
   ```c
