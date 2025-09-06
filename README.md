@@ -57,17 +57,17 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 ### Drone wiring
 ![Drone schematic](circuits_schematics/Drone_circuit.png)
   - solder each of them on a seperate soldering board.
-  - change the SSID and the PASSWORD on the [`camera script`](.camera/CameraWebServer/CameraWebServer.ino) to your wifi' ssid and password:
+  - change the SSID and the PASSWORD on the [`camera script`](camera/CameraWebServer/CameraWebServer.ino) to your wifi' ssid and password:
   ```c
   //change these if needed
   const char *ssid = "elbo7's" ;
   const char *password = "NiggaNigga";
   ```
 - Upload the code to each board:
-  - upload [`lcd screen script`](.controller_lcd/controller_lcd.ino) to the arduino nano controlling the LCD screen.
-  - upload [`rc controller script`](.controller_cmds/controller_cmds.ino) to the arduino nano controlling the remote controller.
-  - upload [`flight sensors script`](.flight_sensors/flight_sensors.ino) to the arduino nano controlling the MPU6050 and NEO-6M.
-  - upload [`flight command script`](.flight_cmds/flight_cmds.ino) to the arduino nano controlling the BLDC motors.
+  - upload [`lcd screen script`](controller_lcd/controller_lcd.ino) to the arduino nano controlling the LCD screen.
+  - upload [`rc controller script`](controller_cmds/controller_cmds.ino) to the arduino nano controlling the remote controller.
+  - upload [`flight sensors script`](flight_sensors/flight_sensors.ino) to the arduino nano controlling the MPU6050 and NEO-6M.
+  - upload [`flight command script`](flight_cmds/flight_cmds.ino) to the arduino nano controlling the BLDC motors.
 - ****🚁 Take off!****
 
 ### 🛠️ Be cautious
