@@ -21,6 +21,10 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 
 - ✅ Emergency landing + engine cut safety
 
+- ✅ GPS-based altitude display
+
+- ✅ Live telemetry on LCD
+
 
 ## 🚀 Quickstart
 
@@ -29,7 +33,7 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 
 | Module           | Why We need it                                                                              | Qte                                                                     |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| Arduino nano     | the brain of the whole operations                                                           | 4                                                                       |
+| Arduino nano     | the brain of the whole operations                                                           | 4 Each Nano handles a dedicated subsystem (LCD, controller inputs, flight sensors, flight commands).                                             |
 | nRF24L01+        | radio communication                                                                         | 3                                                                       |
 | DJI450 FlameWheel| drone frame                                                                                 | 1                                                                       |
 | MPU6050          | inertial measurment unit to get the accelerometer data                                      | 1                                                                       |
@@ -73,25 +77,26 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 ### 🛠️ Be cautious
 - When labeling the BLDC motors in a clockwise direction: **1st** and **3rd**motors are spinning **Counter ClockWise**, **2nd** and **4th** spinning **ClockWise**.
 - The drone **doesn't have** a **protocol** for when it **loses connection** with the RC. **In other words, it will hold the last inputs until it regain connection or motors keep spinning until battery dies**.
-- **Emergency Landing** and **CutOffEngine** are **irreversible**. After these actions are engaged, unplug the battery then re-plug it again if you want to fly the drone(**THIS WAS A SAFETY DESIGN**).
--❌ The Drone is uncapable of doing diagonal movements. **So DO NOT move the joysticks is croos patterns!**
+- **Emergency Landing** and **CutOffEngine** are **irreversible**. After these actions are engaged, disconnect the battery then reconnect it again if you want to fly the drone(**THIS WAS A SAFETY DESIGN**).
+- ❌ The Drone is uncapable of doing diagonal movements. **So DO NOT move the joysticks is cross patterns!**
+- ❌ No failsafe when RC disconnects
 
 ## 🚀 It's Flight Time
-Follow this procedures:
+Follow these procedures:
 - 1st: Power on the RC and **WAIT** for the animation to finish.
   <img
     src="img/rc_init.gif"
     alt="drone"
     width=100%
   />
-- 2nd: Plug the battery connector and wait for the lights to flash.
+- 2nd: Connect the battery connector and wait for the lights to flash.
   <img
     src="img/drone_flash_lights.gif"
     alt="drone"
     width=100%
   />
 - 3rd: On the RC, click on the blue button (the toggle light) to see if there is a solid connection between thedrone and the RC.
-- 4th: If the lights turned on, FLY! If not, get some distance between the RC and the Drone then try again. If that also fails, check the radio modules and see if the drone gets the sent data. If that fails, unplug the battery and repeat from step 2.
+- 4th: If the lights turned on, FLY! If not, get some distance between the RC and the Drone then try again. If that also fails, check the radio modules and see if the drone gets the sent data. If that fails, disconnect the battery and repeat from step 2.
 
 ## 🎮 About the remote
 - The left hand mode, the left joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
