@@ -16,6 +16,12 @@
 ## ✨ What's MagoFly?
 MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by a **remote controller wirelessly** using **nRF24L01+ radio module**.
 
+## 🎨 Features
+- ✅ Remote telemetry on LCD
+
+- ✅ Emergency landing + engine cut safety
+
+
 ## 🚀 Quickstart
 
 ### 💻 Installation
@@ -45,32 +51,30 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 | zip ties         | hold everything to its proper place                                                         | 6                                                                       |
 
 - How to connect all the components:
-  - <p white-space=pre>-------------------for the RC follow this diagram----------------------------for the drone follow this diagram-------</p><br>
-    <img
-    src="circuits_schematics/Controller_circuit.png"
-    alt="drone"
-    width=49%
-    />
-    <img
-    src="circuits_schematics/Drone_circuit.png"
-    alt="drone"
-    width=49%
-    />
+  ### RC wiring
+![Controller schematic](circuits_schematics/Controller_circuit.png)
+
+### Drone wiring
+![Drone schematic](circuits_schematics/Drone_circuit.png)
   - solder each of them on a seperate soldering board.
-- change the SSID and the PASSWORD on the [`camera script`](.camera/CameraWebServer/CameraWebServer.ino) to your wifi' ssid and password:
+  - change the SSID and the PASSWORD on the [`camera script`](.camera/CameraWebServer/CameraWebServer.ino) to your wifi' ssid and password:
   ```c
   //change these if needed
   const char *ssid = "elbo7's" ;
   const char *password = "NiggaNigga";
   ```
-- Upload the code to each board.
-- ****FLY!****
+- Upload the code to each board:
+  - upload [`lcd screen script`](.controller_lcd/controller_lcd.ino) to the arduino nano controlling the LCD screen.
+  - upload [`rc controller script`](.controller_cmds/controller_cmds.ino) to the arduino nano controlling the remote controller.
+  - upload [`flight sensors script`](.flight_sensors/flight_sensors.ino) to the arduino nano controlling the MPU6050 and NEO-6M.
+  - upload [`flight command script`](.flight_cmds/flight_cmds.ino) to the arduino nano controlling the BLDC motors.
+- ****🚁 Take off!****
 
 ### 🛠️ Be cautious
 - When labeling the BLDC motors in a clockwise direction: **1st** and **3rd**motors are spinning **Counter ClockWise**, **2nd** and **4th** spinning **ClockWise**.
-- The drone **doesn't have** a **protocol** for when it **loses connection** with the RC. **In other words, it will hold the last inputs until it regain connection**.
+- The drone **doesn't have** a **protocol** for when it **loses connection** with the RC. **In other words, it will hold the last inputs until it regain connection or motors keep spinning until battery dies**.
 - **Emergency Landing** and **CutOffEngine** are **irreversible**. After these actions are engaged, unplug the battery then re-plug it again if you want to fly the drone(**THIS WAS A SAFETY DESIGN**).
-- The Drone is uncapable of doing diagonal movements. **So DO NOT move the joysticks is croos patterns!**
+-❌ The Drone is uncapable of doing diagonal movements. **So DO NOT move the joysticks is croos patterns!**
 
 ## 🚀 It's Flight Time
 Follow this procedures:
@@ -92,6 +96,15 @@ Follow this procedures:
 ## 🎮 About the remote
 - The left hand mode, the left joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
 under the "THR" on the screen. While the right joystick controls the **THROTTLE** and **YAW** movements and the buttons toggle the meregency landing.
-
+<img
+    src="img/left mode.jpg"
+    alt="drone"
+    width=100%
+/>
 - The right hand mode, the right joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
 under the "THR" on the screen. While the left joystick controls the **THROTTLE** and **YAW** movements and the buttons toggle the meregency landing.
+<img
+    src="img/right mode.jpg"
+    alt="drone"
+    width=100%
+/>
