@@ -29,6 +29,7 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 ## 🚀 Quickstart
 
 ### 💻 Installation
+> Arduino IDE is required for easy installation
 - What we need:
 
 | Module           | Why We need it                                                                              | Qte                                                                     |
@@ -50,7 +51,7 @@ MagoFly is a drone capable of doing basic manoeuvres which is **controlled** by 
 | Buzzer           | make asound everytime the altitude control or the buttons are pushed                        | 1                                                                       |
 | Potentiometer    | determin max altitude                                                                       | 1                                                                       |
 | Resistors        |(10k ohms) to link with the bush buttons between VCC & GND pins so the RC don't short circuit| 3                                                                       |
-| Jumper wires     |  connect every thing                                                                        | ****LOT****                                                             |
+| Jumper wires     |  connect every thing                                                                        | ****LOT****      (>50)                                                  |
 | soldering board  | soldering everything on it                                                                  | 2                                                                       |
 | zip ties         | hold everything to its proper place                                                         | 6                                                                       |
 
@@ -105,17 +106,17 @@ Follow these procedures:
 - 4th: If the lights turned on, FLY! If not, get some distance between the RC and the Drone then try again. If that also fails, check the radio modules and see if the drone gets the sent data. If that fails, disconnect the battery and repeat from step 2.
 
 ## 🎮 About the remote
-- The left hand mode, the left joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
+>- The left hand mode, the left joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
 under the "THR" on the screen. While the right joystick controls the **THROTTLE** and **YAW** movements and the buttons toggle the meregency landing.
-<img
+><img
     src="img/left mode.jpg"
     alt="drone"
     width=100%
-/>
-- The right hand mode, the right joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
+>/>
+>- The right hand mode, the right joystick controls the **PITCH** and **ROLL** movements and the button enable/disable throttle change. You can know if the throttle is disables when you see horizontal line 
 under the "THR" on the screen. While the left joystick controls the **THROTTLE** and **YAW** movements and the buttons toggle the meregency landing.
-<img
+><img
     src="img/right mode.jpg"
     alt="drone"
     width=100%
-/>
+>/>
