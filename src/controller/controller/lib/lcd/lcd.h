@@ -9,5 +9,7 @@ extern U8G2_ST7920_128X64_1_SW_SPI u8g2;
 
 // The only function that needs to be public
 void testDraw(uint8_t state);
+void drawText();
+void drawValues(int roll, int pitch, int yaw, int throttle, int light);
 
 #endif

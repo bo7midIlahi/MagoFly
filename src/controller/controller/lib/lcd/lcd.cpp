@@ -189,3 +189,35 @@ void testDraw(uint8_t state) {
     case 11: u8g2_bitmap_overlay(state & 7); break;
   }
 }
+
+void drawText(){
+  u8g2.setFont(u8g2_font_squeezed_b7_tr);
+  //THR
+  u8g2.drawStr(75,10,"THR");
+  u8g2.drawStr(110,10,"%");
+  //LGT
+  u8g2.drawStr(75,20,"LGT");
+  //ROLL
+  u8g2.drawStr(0,10,"ROLL");
+  //PITCH
+  u8g2.drawStr(0,20,"PITCH");
+  //YAW
+  u8g2.drawStr(0,30,"YAW");
+}
+
+void drawValues(int roll, int pitch, int yaw, int throttle, int light){
+  u8g2.setCursor(27,10);
+  u8g2.print(roll);
+
+  u8g2.setCursor(27,20);
+  u8g2.print(pitch);
+
+  u8g2.setCursor(27,30);
+  u8g2.print(yaw);
+
+  u8g2.setCursor(95,10);
+  u8g2.print(throttle);
+
+  u8g2.setCursor(95,20);
+  u8g2.print(light);
+}
