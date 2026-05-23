@@ -172,7 +172,7 @@ static void u8g2_bitmap_modes(uint8_t transparent) {
 }
 
 //public functions
-void draw(uint8_t state) {
+void testDraw(uint8_t state) {
   u8g2_prepare();
   switch(state >> 3) {
     case 0: u8g2_box_frame(state & 7); break;

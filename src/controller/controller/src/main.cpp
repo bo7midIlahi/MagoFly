@@ -13,7 +13,7 @@ void setup(void) {
 void loop(void) {
   u8g2.firstPage();
   do {
-    draw(draw_state);
+    testDraw(draw_state);
   } while (u8g2.nextPage());
 
   draw_state++;

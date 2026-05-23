@@ -8,6 +8,6 @@
 extern U8G2_ST7920_128X64_1_SW_SPI u8g2;
 
 // The only function that needs to be public
-void draw(uint8_t state);
+void testDraw(uint8_t state);
 
 #endif
