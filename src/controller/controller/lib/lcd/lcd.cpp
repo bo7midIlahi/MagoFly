@@ -197,6 +197,8 @@ void drawText(){
   u8g2.drawStr(110,10,"%");
   //LGT
   u8g2.drawStr(75,20,"LGT");
+  //ALT
+  u8g2.drawStr(75,30,"ALT");
   //ROLL
   u8g2.drawStr(0,10,"ROLL");
   //PITCH
@@ -205,7 +207,7 @@ void drawText(){
   u8g2.drawStr(0,30,"YAW");
 }
 
-void drawValues(int roll, int pitch, int yaw, int throttle, int light){
+void drawValues(int roll, int pitch, int yaw, int throttle, int light, int alt){
   u8g2.setCursor(27,10);
   u8g2.print(roll);
 
@@ -220,4 +222,7 @@ void drawValues(int roll, int pitch, int yaw, int throttle, int light){
 
   u8g2.setCursor(95,20);
   u8g2.print(light);
+
+  u8g2.setCursor(95,30);
+  u8g2.print(alt);
 }
