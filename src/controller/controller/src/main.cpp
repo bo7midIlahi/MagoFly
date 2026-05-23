@@ -1,99 +1,24 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <ADS1X15.h>
+#include <U8g2lib.h>
+#include <lcd.h>
 
-ADS1115 ADS(0x48);
+U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, /* clock=*/ 6, /* data=*/ 7, /* CS=*/ 9, /* reset=*/ 8);
 
-#define JOYSTICK1_BTN 15
-#define JOYSTICK2_BTN 14
+uint8_t draw_state = 0;
 
-#define BTN_RED 6
-#define BTN_GREEN 9
-#define BTN_BLUE 8
-
-void setup() {
-  Serial.begin(115200);
-  Wire.begin();  // make sure to start Wire
-
-  if (!ADS.begin()) {
-    Serial.println("ADS1115 not found. Check wiring and address!");
-    while (1);
-  }
-  ADS.setGain(0);  // ±6.144V, 1 bit = 0.1875mV
-  Serial.println("ADS1115 ready.");
-
-  pinMode(JOYSTICK1_BTN, INPUT);
-  pinMode(JOYSTICK2_BTN, INPUT);
-
-  pinMode(BTN_RED, INPUT_PULLUP);
-  pinMode(BTN_GREEN, INPUT_PULLUP);
-  pinMode(BTN_BLUE, INPUT_PULLUP);
-
+void setup(void) {
+  u8g2.begin();
 }
 
-void loop() {
-  int16_t roll  = ADS.readADC(0);
-  int16_t pitch = ADS.readADC(1);
-  int16_t yaw   = ADS.readADC(2);
-  int16_t thr   = ADS.readADC(3);
+void loop(void) {
+  u8g2.firstPage();
+  do {
+    draw(draw_state);
+  } while (u8g2.nextPage());
 
-  // convert each to voltage
-  float v0 = ADS.toVoltage(roll);
-  float v1 = ADS.toVoltage(pitch);
-  float v2 = ADS.toVoltage(yaw);
-  float v3 = ADS.toVoltage(thr);
+  draw_state++;
+  if (draw_state >= 12 * 8)
+    draw_state = 0;
 
-  Serial.print("Roll: ");   Serial.print(roll);   Serial.print("\t"); Serial.println(v0, 3);
-  Serial.print("Pitch: "); Serial.print(pitch); Serial.print("\t"); Serial.println(v1, 3);
-  Serial.print("Yaw: ");   Serial.print(yaw);   Serial.print("\t"); Serial.println(v2, 3);
-  Serial.print("Thr: ");   Serial.print(thr);   Serial.print("\t"); Serial.println(v3, 3);
-  Serial.print("BTN1: ");
-  if (digitalRead(JOYSTICK1_BTN))
-  {
-    Serial.println("HIGH");
-  }else
-  {
-    Serial.println("LOW");
-  }
-  
-  
-  Serial.print("BNT2: ");
-  if (digitalRead(JOYSTICK2_BTN))
-  {
-    Serial.println("HIGH");
-  }else
-  {
-    Serial.println("LOW");
-  }
-
-  Serial.print("BTN_RED: ");
-  if (digitalRead(BTN_RED))
-  {
-    Serial.println("HIGH");
-  }else
-  {
-    Serial.println("LOW");
-  }
-
-  Serial.print("BTN_GREEN: ");
-  if (digitalRead(BTN_GREEN))
-  {
-    Serial.println("HIGH");
-  }else
-  {
-    Serial.println("LOW");
-  }
-
-  Serial.print("BTN_BLUE: ");
-  if (digitalRead(BTN_BLUE))
-  {
-    Serial.println("HIGH");
-  }else
-  {
-    Serial.println("LOW");
-  }
-
-  Serial.println();
-
-  delay(1000);
+  delay(100);
 }
