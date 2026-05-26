@@ -20,6 +20,9 @@ Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 #define ALTITUDE_CONTROL   0
 #define LIGHT_ENABLE       0
 
+// Potentiometer
+#define POTENTIOMETER 26
+
 // One and only definition of userCollection
 struct Collection userCollection;
 
@@ -42,9 +45,11 @@ void loop(void) {
     drawText();
     drawValues(9999, 8888, 7777, 100, 555, 255);
     getUserJoysticks(JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
-    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\n",
+    userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
+    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\t ALTITUTDE: %d\n",
                   userCollection.roll, userCollection.pitch,
-                  userCollection.yaw, userCollection.throttle);
+                  userCollection.yaw, userCollection.throttle,
+                  userCollection.altitude);
   } while (u8g2.nextPage());
   delay(100);
 }
