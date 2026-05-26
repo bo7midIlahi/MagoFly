@@ -1,46 +1,50 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <lcd.h>
+#include <helper.h>
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
 
-struct Collection
-{
-  int roll;
-  int pitch;
-  int yaw;
-  int throttle;
-  int altitude;
-  /*Instead of making six different boolean variables that will hold lot of space,
-  one byte where each bit is associated to a state as follows
-  1st LSB : Light
-  2nd LSB : Hand
-  3rd LSB : Altitude control enable
-  4rth LSB : Engine kill
-  5rth LSB : Throttle control enable
-  6rth LSB : Return To Ground
-  */
-  byte FLAGS;
-};
+Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 
+// Joystick pins
+#define JOYSTICK1X   0
+#define JOYSTICK1Y   1
+#define JOYSTICK1BTN 14
+#define JOYSTICK2X   2
+#define JOYSTICK2Y   3
+#define JOYSTICK2BTN 15
 
-U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, /* clock=*/ 6, /* data=*/ 7, /* CS=*/ 9, /* reset=*/ 8);
+// Button pins (all zero for now)
+#define HAND_MODE          0
+#define ALTITUDE_CONTROL   0
+#define LIGHT_ENABLE       0
 
-//uint8_t draw_state = 0; //remove comment to debug
+// One and only definition of userCollection
+struct Collection userCollection;
+
+U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, 6, 7, 9, 8);
 
 void setup(void) {
+  Serial.begin(115200);        // Always specify a baud rate
   u8g2.begin();
+  ADS.setGain(GAIN_ONE); // Set gain to 1 for a +/- 4.096V range
+
+  if (!ADS.begin()) {
+    Serial.println("Failed to initialize ADS. Check wiring!");
+    while (1);
+  }           // 0=6.144V, 1=4.096V, 2=2.048V …
 }
 
 void loop(void) {
   u8g2.firstPage();
   do {
     drawText();
-    drawValues(9999,8888,7777,100,555,255);
-    //testDraw(draw_state); //remove comment to debug
+    drawValues(9999, 8888, 7777, 100, 555, 255);
+    getUserJoysticks(JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
+    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\n",
+                  userCollection.roll, userCollection.pitch,
+                  userCollection.yaw, userCollection.throttle);
   } while (u8g2.nextPage());
-
-  /*draw_state++; //remove comment to debug
-  if (draw_state >= 12 * 8)
-    draw_state = 0;
-  */
   delay(100);
 }
