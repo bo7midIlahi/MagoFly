@@ -31,6 +31,7 @@ U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, 6, 7, 9, 8);
 void setup(void) {
   Serial.begin(115200);        // Always specify a baud rate
   u8g2.begin();
+  u8g2.setBusClock(8000000);
   ADS.setGain(GAIN_ONE); // Set gain to 1 for a +/- 4.096V range
 
   if (!ADS.begin()) {
@@ -43,7 +44,7 @@ void loop(void) {
   u8g2.firstPage();
   do {
     drawText();
-    drawValues(9999, 8888, 7777, 100, 555, 255);
+    drawValues(9999, 8888, 7777, 100, 555, userCollection.altitude);
     getUserJoysticks(JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
     userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
     Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\t ALTITUTDE: %d\n",
