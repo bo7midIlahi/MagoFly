@@ -31,7 +31,7 @@ U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, 6, 7, 9, 8);
 void setup(void) {
   Serial.begin(115200);        // Always specify a baud rate
   u8g2.begin();
-  u8g2.setBusClock(8000000);
+  //u8g2.setBusClock(8000000);
   ADS.setGain(GAIN_ONE); // Set gain to 1 for a +/- 4.096V range
 
   if (!ADS.begin()) {

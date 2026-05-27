@@ -15,7 +15,7 @@ struct Collection {
   int pitch;
   int yaw;
   int throttle;
-  int altitude;
+  uint8_t altitude;
   byte FLAGS;   // bit‑mapped flags
 };
 
