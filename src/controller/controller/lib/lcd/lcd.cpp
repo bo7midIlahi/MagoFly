@@ -216,7 +216,7 @@ void drawText(){
   }else
   {
     u8g2.drawStr(65,64,"RIGHT HANDED");
-    u8g2.drawStr(0, 64, "v0.23");
+    u8g2.drawStr(0, 64, "v0.33");
   }
   
 }
