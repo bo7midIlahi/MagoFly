@@ -13,5 +13,7 @@ void testDraw(uint8_t state);
 void drawText();
 void drawValues(int roll, int pitch, int yaw, int throttle, int alt, int light);
 void drawSmileyFace();
+void drawBlinkingLanding();
+void drawEngineCut();
 
 #endif

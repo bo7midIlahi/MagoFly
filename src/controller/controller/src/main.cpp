@@ -75,6 +75,8 @@ void loop1(){
     drawText();
     drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
     drawSmileyFace();
+    if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
+    if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
   } while (u8g2.nextPage());
   delay(100);
 };
