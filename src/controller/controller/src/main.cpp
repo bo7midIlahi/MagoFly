@@ -33,7 +33,7 @@ U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, 6, 7, 9, 8);
 
 void setup(void) {
   Serial.begin(115200);        // Always specify a baud rate
-  u8g2.begin();
+  //u8g2.begin();
   //u8g2.setBusClock(8000000);
   ADS.setGain(GAIN_ONE); // Set gain to 1 for a +/- 4.096V range
 
@@ -52,21 +52,41 @@ void setup(void) {
 }
 
 void loop(void) {
+  //drawText();
+  getUserJoysticks(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN),JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
+  //drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
+  userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
+  setFLAGS(digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE),digitalRead(TOGGLE_SWITCH));
+  Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tTHROT: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
+                userCollection.roll, userCollection.pitch,
+                userCollection.yaw, userCollection.throttle,ADS.readADC_SingleEnded(JOYSTICK1Y),
+                userCollection.altitude, digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN));
+  Serial.printf("FLAGS: ");
+  Serial.print(userCollection.FLAGS, BIN);
+  Serial.print("\n");
+  delay(100);
+}
+
+void setup1(){
+  u8g2.begin();
+};
+
+void loop1(){
   u8g2.firstPage();
   do {
     drawText();
-    getUserJoysticks(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN),JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
+    //getUserJoysticks(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN),JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
     drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
-    userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
-    setFLAGS(digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE),digitalRead(TOGGLE_SWITCH));
-    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tTHROT: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
+    //userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
+    //setFLAGS(digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE),digitalRead(TOGGLE_SWITCH));
+    /*Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tTHROT: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
                   userCollection.roll, userCollection.pitch,
                   userCollection.yaw, userCollection.throttle,ADS.readADC_SingleEnded(JOYSTICK1Y),
                   userCollection.altitude, digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN));
     Serial.printf("FLAGS: ");
     Serial.print(userCollection.FLAGS, BIN);
     Serial.print("\n");
-
+    */
   } while (u8g2.nextPage());
   delay(100);
-}
+};
