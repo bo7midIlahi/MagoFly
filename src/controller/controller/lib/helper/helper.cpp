@@ -44,10 +44,11 @@ void getUserJoysticks(int joystickbtn1, int joystickbtn2,int X1, int Y1, int X2,
   
 }
 
-void setFLAGS(int handmode, int alt_ctrl, int light_enable){
+void setFLAGS(int handmode, int alt_ctrl, int light_enable,int engine_kill){
 
   if (!handmode) TOGGLE_BIT(userCollection.FLAGS,0);
   if (!alt_ctrl) TOGGLE_BIT(userCollection.FLAGS,2);
   if (!light_enable) TOGGLE_BIT(userCollection.FLAGS,1);
+  if (engine_kill) TOGGLE_BIT(userCollection.FLAGS,3);
   
 }

@@ -23,6 +23,9 @@ Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 // Potentiometer
 #define POTENTIOMETER 26
 
+//Toggle Wsitch
+#define TOGGLE_SWITCH 27
+
 // One and only definition of userCollection
 struct Collection userCollection;
 
@@ -45,6 +48,7 @@ void setup(void) {
   pinMode(HAND_MODE, INPUT_PULLUP);
   pinMode(ALTITUDE_CONTROL, INPUT_PULLUP);
   pinMode(LIGHT_ENABLE, INPUT_PULLUP);
+  pinMode(TOGGLE_SWITCH, INPUT_PULLDOWN);
 }
 
 void loop(void) {
@@ -54,7 +58,7 @@ void loop(void) {
     getUserJoysticks(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN),JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
     drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
     userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
-    setFLAGS(digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE));
+    setFLAGS(digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE),digitalRead(TOGGLE_SWITCH));
     Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tTHROT: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
                   userCollection.roll, userCollection.pitch,
                   userCollection.yaw, userCollection.throttle,ADS.readADC_SingleEnded(JOYSTICK1Y),
