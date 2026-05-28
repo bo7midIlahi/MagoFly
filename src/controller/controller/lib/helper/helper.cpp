@@ -49,6 +49,6 @@ void setFLAGS(int handmode, int alt_ctrl, int light_enable,int engine_kill){
   if (!handmode) TOGGLE_BIT(userCollection.FLAGS,0);
   if (!alt_ctrl) TOGGLE_BIT(userCollection.FLAGS,2);
   if (!light_enable) TOGGLE_BIT(userCollection.FLAGS,1);
-  if (engine_kill) TOGGLE_BIT(userCollection.FLAGS,3);
+  engine_kill ? SET_BIT(userCollection.FLAGS,3) : CLEAR_BIT(userCollection.FLAGS,3);
   
 }
