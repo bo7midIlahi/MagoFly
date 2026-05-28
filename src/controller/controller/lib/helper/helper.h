@@ -33,6 +33,6 @@ struct Collection {
 };
 
 void getUserJoysticks(int X1, int Y1, int X2, int Y2);
-void setFLAGS(int btn1, int btn2);
+void setFLAGS(int joystickbtn1, int joystickbtn2,int handmode, int alt_ctrl, int light_enable);
 
 #endif

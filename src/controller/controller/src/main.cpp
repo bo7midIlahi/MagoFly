@@ -16,9 +16,9 @@ Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 #define JOYSTICK2BTN 15
 
 // Button pins (all zero for now)
-#define HAND_MODE          0
-#define ALTITUDE_CONTROL   0
-#define LIGHT_ENABLE       0
+#define HAND_MODE          21
+#define ALTITUDE_CONTROL   20
+#define LIGHT_ENABLE       19
 
 // Potentiometer
 #define POTENTIOMETER 26
@@ -42,6 +42,9 @@ void setup(void) {
   //PINS
   pinMode(JOYSTICK1BTN, INPUT_PULLUP);
   pinMode(JOYSTICK2BTN, INPUT_PULLUP);
+  pinMode(HAND_MODE, INPUT_PULLUP);
+  pinMode(ALTITUDE_CONTROL, INPUT_PULLUP);
+  pinMode(LIGHT_ENABLE, INPUT_PULLUP);
 }
 
 void loop(void) {
@@ -51,7 +54,7 @@ void loop(void) {
     getUserJoysticks(JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
     drawValues(9999, 8888, 7777, 100, 555, userCollection.altitude);
     userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
-    setFLAGS(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN));
+    setFLAGS(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN),digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE));
     Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
                   userCollection.roll, userCollection.pitch,
                   userCollection.yaw, userCollection.throttle,
