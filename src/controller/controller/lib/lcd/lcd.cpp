@@ -212,7 +212,7 @@ void drawText(){
   if (CHECK_BIT(userCollection.FLAGS,0))
   {
     u8g2.drawStr(0,64,"LEFT HANDED");
-    u8g2.drawStr(105, 64, "v0.23");
+    u8g2.drawStr(105, 64, "v0.4");
   }else
   {
     u8g2.drawStr(65,64,"RIGHT HANDED");
