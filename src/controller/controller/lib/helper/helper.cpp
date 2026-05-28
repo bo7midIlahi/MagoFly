@@ -6,3 +6,9 @@ void getUserJoysticks(int X1, int Y1, int X2, int Y2) {
   userCollection.throttle = ADS.readADC_SingleEnded(X2);
   userCollection.yaw      = ADS.readADC_SingleEnded(Y2);
 }
+
+void setFLAGS(int btn1, int btn2){
+  if (!btn1) TOGGLE_BIT(userCollection.FLAGS,4);
+  if (!btn2) TOGGLE_BIT(userCollection.FLAGS,5);
+  
+}

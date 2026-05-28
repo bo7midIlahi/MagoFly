@@ -38,6 +38,10 @@ void setup(void) {
     Serial.println("Failed to initialize ADS. Check wiring!");
     while (1);
   }           // 0=6.144V, 1=4.096V, 2=2.048V …
+
+  //PINS
+  pinMode(JOYSTICK1BTN, INPUT_PULLUP);
+  pinMode(JOYSTICK2BTN, INPUT_PULLUP);
 }
 
 void loop(void) {
@@ -47,10 +51,15 @@ void loop(void) {
     drawValues(9999, 8888, 7777, 100, 555, userCollection.altitude);
     getUserJoysticks(JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
     userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
-    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\t ALTITUTDE: %d\n",
+    setFLAGS(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN));
+    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
                   userCollection.roll, userCollection.pitch,
                   userCollection.yaw, userCollection.throttle,
-                  userCollection.altitude);
+                  userCollection.altitude, digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN));
+    Serial.printf("FLAGS: ");
+    Serial.print(userCollection.FLAGS, BIN);
+    Serial.print("\n");
+
   } while (u8g2.nextPage());
   delay(100);
 }
