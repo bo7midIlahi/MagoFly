@@ -29,7 +29,8 @@ Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 // One and only definition of userCollection
 struct Collection userCollection;
 
-U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, 6, 7, 9, 8);
+U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R0, /* clock=*/ 6, /* data=*/ 7, /* CS=*/ 9, /* reset=*/ 8);
+//U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, 6, 7, 9, 8);
 
 void setup(void) {
   Serial.begin(115200);        // Always specify a baud rate
@@ -70,7 +71,15 @@ void setup1(){
 };
 
 void loop1(){
-  u8g2.firstPage();
+  u8g2.clearBuffer();
+  drawText();
+  drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
+  drawSmileyFace();
+  if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
+  if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
+  
+  u8g2.sendBuffer();
+  /*u8g2.firstPage();
   do {
     drawText();
     drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
@@ -78,5 +87,5 @@ void loop1(){
     if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
     if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
   } while (u8g2.nextPage());
-  delay(100);
+  //delay(100);*/
 };
