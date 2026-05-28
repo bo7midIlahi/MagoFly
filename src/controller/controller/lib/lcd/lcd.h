@@ -15,5 +15,6 @@ void drawValues(int roll, int pitch, int yaw, int throttle, int alt, int light);
 void drawSmileyFace();
 void drawBlinkingLanding();
 void drawEngineCut();
+void drawBootLogo(uint8_t angle);   // angle for propeller rotation
 
 #endif

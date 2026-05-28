@@ -216,7 +216,7 @@ void drawText(){
   }else
   {
     u8g2.drawStr(65,64,"RIGHT HANDED");
-    u8g2.drawStr(0, 64, "v0.33");
+    u8g2.drawStr(0, 64, "v0.4");
   }
   
 }
@@ -313,3 +313,45 @@ void drawEngineCut() {
     u8g2.drawStr(38, 64, "ENGINES OFF");
   }
 }
+
+void drawBootLogo(uint8_t angle) {
+  // Outer frame
+  u8g2.drawRFrame(0, 0, 128, 64, 4);
+
+  // Central body
+  u8g2.drawRBox(54, 27, 20, 12, 2);       // main body
+  u8g2.drawBox(56, 22, 16, 5);            // top deck
+
+  // ---- Front-Left motor (top‑left area) ----
+  u8g2.drawLine(58, 29, 30, 10);          // arm
+  u8g2.drawCircle(27, 8, 6);              // motor
+  u8g2.drawArc(27, 8, 8, angle, angle + 120);   // propeller arc
+
+  // ---- Front-Right motor (top‑right area) ----
+  u8g2.drawLine(70, 29, 98, 10);
+  u8g2.drawCircle(101, 8, 6);
+  u8g2.drawArc(101, 8, 8, angle + 90, angle + 210);  // offset for variety
+
+  // ---- Rear-Left motor (bottom‑left) ----
+  u8g2.drawLine(58, 35, 26, 50);
+  u8g2.drawCircle(23, 52, 6);
+  u8g2.drawArc(23, 52, 8, angle + 180, angle + 300);
+
+  // ---- Rear-Right motor (bottom‑right) ----
+  u8g2.drawLine(70, 35, 102, 50);
+  u8g2.drawCircle(105, 52, 6);
+  u8g2.drawArc(105, 52, 8, angle + 270, angle + 390);  // or +30
+
+  // Landing skids
+  u8g2.drawLine(54, 39, 46, 55);          // left skid
+  u8g2.drawLine(74, 39, 82, 55);          // right skid
+  u8g2.drawHLine(43, 55, 12);             // left foot
+  u8g2.drawHLine(78, 55, 12);             // right foot
+
+  // Text
+  u8g2.setFont(u8g2_font_squeezed_b7_tr);
+  u8g2.drawStr(42, 0, "DRONE OS");
+  u8g2.setFont(u8g2_font_5x7_tr);
+  u8g2.drawStr(95, 0, "v0.4");
+}
+

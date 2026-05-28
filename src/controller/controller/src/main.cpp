@@ -66,12 +66,25 @@ void loop(void) {
   delay(100);
 }
 
-void setup1(){
+void setup1() {
   u8g2.begin();
-};
+
+  // Play boot animation for ~2 seconds
+  for (int i = 0; i < 25; i++) {      // 25 frames
+    u8g2.clearBuffer();
+    drawBootLogo(i * 10);
+    u8g2.sendBuffer();
+    delay(80);
+  }
+
+  // Clear screen and prepare for main HUD
+  u8g2.clearBuffer();
+  u8g2.sendBuffer();
+}
 
 void loop1(){
   u8g2.clearBuffer();
+
   drawText();
   drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
   drawSmileyFace();
@@ -79,13 +92,4 @@ void loop1(){
   if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
   
   u8g2.sendBuffer();
-  /*u8g2.firstPage();
-  do {
-    drawText();
-    drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
-    drawSmileyFace();
-    if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
-    if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
-  } while (u8g2.nextPage());
-  //delay(100);*/
 };
