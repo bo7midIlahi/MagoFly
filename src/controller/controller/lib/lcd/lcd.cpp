@@ -195,6 +195,7 @@ void drawText(){
   //THR
   u8g2.drawStr(75,10,"THR");
   u8g2.drawStr(110,10,"%");
+  if (CHECK_BIT(userCollection.FLAGS,4)) u8g2.drawHLine(75, 11, 40);
   //LGT
   u8g2.drawStr(75,20,"LGT");
   //ALT
