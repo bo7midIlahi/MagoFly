@@ -32,7 +32,7 @@ struct Collection {
   */
 };
 
-void getUserJoysticks(int X1, int Y1, int X2, int Y2);
-void setFLAGS(int joystickbtn1, int joystickbtn2,int handmode, int alt_ctrl, int light_enable);
+void getUserJoysticks(int joystickbtn1, int joystickbtn2,int X1, int Y1, int X2, int Y2);
+void setFLAGS(int handmode, int alt_ctrl, int light_enable);
 
 #endif

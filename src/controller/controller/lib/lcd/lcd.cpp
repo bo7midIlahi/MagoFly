@@ -234,8 +234,8 @@ void drawValues(int roll, int pitch, int yaw, int throttle, int light, int alt){
   u8g2.print(throttle);
 
   u8g2.setCursor(95,20);
-  u8g2.print(light);
+  light ? u8g2.print("ON") : u8g2.print("OFF");
 
   u8g2.setCursor(95,30);
-  alt ? u8g2.print("ON") : u8g2.print("OFF");
+  alt ? u8g2.print(userCollection.altitude) : u8g2.print("OFF");
 }
