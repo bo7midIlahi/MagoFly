@@ -240,3 +240,11 @@ void drawValues(int roll, int pitch, int yaw, int throttle, int light, int alt){
   u8g2.setCursor(95,30);
   alt ? u8g2.print(userCollection.altitude) : u8g2.print("OFF");
 }
+
+//Animations & Emojis
+void drawSmileyFace() {
+  u8g2.drawCircle(10, 43, 10);
+  u8g2.drawPixel(15, 40);
+  u8g2.drawPixel(5, 40);
+  u8g2.drawArc(10, 43, 6, 149, 236);
+}
