@@ -224,5 +224,5 @@ void drawValues(int roll, int pitch, int yaw, int throttle, int light, int alt){
   u8g2.print(light);
 
   u8g2.setCursor(95,30);
-  CHECK_BIT(userCollection.FLAGS,1) ? u8g2.print("ON") : u8g2.print("OFF");
+  alt ? u8g2.print("ON") : u8g2.print("OFF");
 }

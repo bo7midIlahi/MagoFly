@@ -52,7 +52,7 @@ void loop(void) {
   do {
     drawText();
     getUserJoysticks(JOYSTICK1X, JOYSTICK1Y, JOYSTICK2X, JOYSTICK2Y);
-    drawValues(9999, 8888, 7777, 100, 555, userCollection.altitude);
+    drawValues(9999, 8888, 7777, 100, 555, CHECK_BIT(userCollection.FLAGS,1));
     userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
     setFLAGS(digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN),digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE));
     Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
