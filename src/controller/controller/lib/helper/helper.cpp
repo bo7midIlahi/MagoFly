@@ -5,7 +5,18 @@ void getUserJoysticks(int joystickbtn1, int joystickbtn2,int X1, int Y1, int X2,
   {
     userCollection.roll     = ADS.readADC_SingleEnded(X1);
     userCollection.pitch    = ADS.readADC_SingleEnded(Y1);
-    userCollection.throttle = ADS.readADC_SingleEnded(Y2);
+    //userCollection.throttle = ADS.readADC_SingleEnded(Y2);
+    if (!CHECK_BIT(userCollection.FLAGS,4))
+    {
+      if ((ADS.readADC_SingleEnded(Y2)>30000) && (userCollection.throttle<100))
+      {
+        userCollection.throttle += 1;
+      }
+      if ((ADS.readADC_SingleEnded(Y2)<100) && (userCollection.throttle>0))
+      {
+        userCollection.throttle -= 1;
+      }
+    }
     userCollection.yaw      = ADS.readADC_SingleEnded(X2);
     if (!joystickbtn2) TOGGLE_BIT(userCollection.FLAGS,4);
     if (!joystickbtn1) TOGGLE_BIT(userCollection.FLAGS,5);
@@ -13,7 +24,18 @@ void getUserJoysticks(int joystickbtn1, int joystickbtn2,int X1, int Y1, int X2,
   {
     userCollection.roll     = ADS.readADC_SingleEnded(X2);
     userCollection.pitch    = ADS.readADC_SingleEnded(Y2);
-    userCollection.throttle = ADS.readADC_SingleEnded(Y1);
+    //userCollection.throttle = ADS.readADC_SingleEnded(Y1);
+    if (!CHECK_BIT(userCollection.FLAGS,4))
+    {
+      if ((ADS.readADC_SingleEnded(Y1)>30000) && (userCollection.throttle<100))
+      {
+        userCollection.throttle += 1;
+      }
+      if ((ADS.readADC_SingleEnded(Y1)<100) && (userCollection.throttle>0))
+      {
+        userCollection.throttle -= 1;
+      }
+    }
     userCollection.yaw      = ADS.readADC_SingleEnded(X1);
     if (!joystickbtn1) TOGGLE_BIT(userCollection.FLAGS,4);
     if (!joystickbtn2) TOGGLE_BIT(userCollection.FLAGS,5);

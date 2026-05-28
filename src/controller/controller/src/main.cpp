@@ -55,9 +55,9 @@ void loop(void) {
     drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
     userCollection.altitude = map(analogRead(POTENTIOMETER),0,4096,0,1024);
     setFLAGS(digitalRead(HAND_MODE),digitalRead(ALTITUDE_CONTROL),digitalRead(LIGHT_ENABLE));
-    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
+    Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tTHROT: %d\tALTITUTDE: %d\tBTN1: %d\tBTN2: %d\n",
                   userCollection.roll, userCollection.pitch,
-                  userCollection.yaw, userCollection.throttle,
+                  userCollection.yaw, userCollection.throttle,ADS.readADC_SingleEnded(JOYSTICK1Y),
                   userCollection.altitude, digitalRead(JOYSTICK1BTN),digitalRead(JOYSTICK2BTN));
     Serial.printf("FLAGS: ");
     Serial.print(userCollection.FLAGS, BIN);
