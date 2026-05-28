@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <U8g2lib.h>
+#include <helper.h>
 
 // The U8g2 object is defined in main.cpp – this makes it visible to the library
 extern U8G2_ST7920_128X64_1_SW_SPI u8g2;
