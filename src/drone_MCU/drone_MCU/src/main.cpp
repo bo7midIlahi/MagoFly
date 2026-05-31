@@ -12,6 +12,12 @@ Servo ESC2;
 Servo ESC3; 
 Servo ESC4;
 
+//define LED pins
+#define LED1 27
+#define LED2 21
+#define LED3 10
+#define LED4 6
+
 //define throt
 uint16_t THROTTLE;
 
@@ -59,6 +65,23 @@ void calibrateAllESCs() {
   // Now ESCs are calibrated – they will arm next time they see low throttle
 }
 
+void blink(int iteration, int time){
+  for (int i = 0; i < iteration; i++)
+  {
+    sio_hw->gpio_togl = (1 << LED1);
+    sio_hw->gpio_togl = (1 << LED2);
+    sio_hw->gpio_togl = (1 << LED3);
+    sio_hw->gpio_togl = (1 << LED4);
+    delay(time); // Delay for 200 milliseconds
+    
+    sio_hw->gpio_togl = (1 << LED1);
+    sio_hw->gpio_togl = (1 << LED2);
+    sio_hw->gpio_togl = (1 << LED3);
+    sio_hw->gpio_togl = (1 << LED4);
+    delay(time); // Delay for 200 milliseconds
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(16,OUTPUT);
@@ -67,16 +90,21 @@ void setup() {
   calibrateAllESCs();
   armESC();
   Serial.printf("finished setup");
+
+  //pin config
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+
+  blink(2,200);
 }
 
 void loop() {
   if (!commIsConnected()) {
     // Not connected – blink LED to indicate
     Serial.println("Not connected to remote");
-    digitalWrite(16, HIGH);
-    delay(500);
-    digitalWrite(16, LOW);
-    delay(500);
+    blink(1,500);
     return;
   }
 
@@ -107,7 +135,7 @@ void loop() {
   {
     // Toggle GPIO 16 instantly using the hardware XOR register
     Serial.println("No DATA");
-    digitalWrite(16, HIGH);
+    blink(1,100);
   }
   
 /*
