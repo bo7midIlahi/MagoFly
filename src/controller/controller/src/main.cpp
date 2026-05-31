@@ -119,7 +119,7 @@ void loop1(){
   //drawSmileyFace();
   if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
   if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
-  commIsConnected() ? CONNECTED==true : CONNECTED==false;
+  commIsConnected() ? (CONNECTED==true, Serial.println("CONNETED")) : (CONNECTED==false, Serial.println("No CONNECTION"));
   
   u8g2.sendBuffer();
 };
