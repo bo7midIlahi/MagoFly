@@ -8,11 +8,11 @@ void getUserJoysticks(int joystickbtn1, int joystickbtn2,int X1, int Y1, int X2,
     //userCollection.throttle = ADS.readADC_SingleEnded(Y2);
     if (!CHECK_BIT(userCollection.FLAGS,4))
     {
-      if ((ADS.readADC_SingleEnded(Y2)>30000) && (userCollection.throttle<100))
+      if ((ADS.readADC_SingleEnded(Y2)<100) && (userCollection.throttle<100))
       {
         userCollection.throttle += 1;
       }
-      if ((ADS.readADC_SingleEnded(Y2)<100) && (userCollection.throttle>0))
+      if ((ADS.readADC_SingleEnded(Y2)>30000) && (userCollection.throttle>0))
       {
         userCollection.throttle -= 1;
       }
@@ -27,11 +27,11 @@ void getUserJoysticks(int joystickbtn1, int joystickbtn2,int X1, int Y1, int X2,
     //userCollection.throttle = ADS.readADC_SingleEnded(Y1);
     if (!CHECK_BIT(userCollection.FLAGS,4))
     {
-      if ((ADS.readADC_SingleEnded(Y1)>30000) && (userCollection.throttle<100))
+      if ((ADS.readADC_SingleEnded(Y1)<100) && (userCollection.throttle<100))
       {
         userCollection.throttle += 1;
       }
-      if ((ADS.readADC_SingleEnded(Y1)<100) && (userCollection.throttle>0))
+      if ((ADS.readADC_SingleEnded(Y1)>30000) && (userCollection.throttle>0))
       {
         userCollection.throttle -= 1;
       }
