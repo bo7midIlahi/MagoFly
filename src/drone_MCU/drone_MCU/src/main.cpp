@@ -13,7 +13,7 @@ Servo ESC3;
 Servo ESC4;
 
 //define throt
-uint8_t THROTTLE;
+uint16_t THROTTLE;
 
 ControlPacket receivedCtrl;
 
@@ -84,7 +84,8 @@ void loop() {
     // Map received data to motor commands
     // receivedCtrl.roll, pitch, yaw, throttle, FLAGS, etc.
     //sio_hw->gpio_clr = (1 << 16);
-    THROTTLE = map(receivedCtrl.throttle,0,100,1000,2000);
+    THROTTLE = constrain(map(receivedCtrl.throttle, 0, 100, 1000, 2000), 1000, 2000);
+    Serial.print("THROTL: "); Serial.println(THROTTLE);
 
     setThrottle(THROTTLE);
     if (receivedCtrl.pitch>30000) moveForward(THROTTLE);
