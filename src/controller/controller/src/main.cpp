@@ -4,15 +4,16 @@
 #include <helper.h>
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
+#include <communication.h>
 
 Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 
 // Joystick pins
-#define JOYSTICK1X   0
-#define JOYSTICK1Y   1
+#define JOYSTICK1X   1
+#define JOYSTICK1Y   0
 #define JOYSTICK1BTN 14
-#define JOYSTICK2X   2
-#define JOYSTICK2Y   3
+#define JOYSTICK2X   3
+#define JOYSTICK2Y   2
 #define JOYSTICK2BTN 15
 
 // Button pins (all zero for now)
@@ -50,6 +51,21 @@ void setup(void) {
   pinMode(ALTITUDE_CONTROL, INPUT_PULLUP);
   pinMode(LIGHT_ENABLE, INPUT_PULLUP);
   pinMode(TOGGLE_SWITCH, INPUT_PULLDOWN);
+
+  //setup wifi
+  commBegin(CommRole::REMOTE, "DroneRemote", "12345678");
+}
+
+void sendPacket(){
+  ControlPacket ctrl;
+  ctrl.roll      = userCollection.roll;
+  ctrl.pitch     = userCollection.pitch;
+  ctrl.yaw       = userCollection.yaw;
+  ctrl.throttle  = userCollection.throttle;
+  ctrl.altitude  = userCollection.altitude;
+  ctrl.FLAGS     = userCollection.FLAGS;
+  Serial.print("SENT : ");
+  Serial.println(sendControl(ctrl));
 }
 
 void loop(void) {
@@ -63,7 +79,16 @@ void loop(void) {
   Serial.printf("FLAGS: ");
   Serial.print(userCollection.FLAGS, BIN);
   Serial.print("\n");
+
+  sendPacket();
   delay(100);
+}
+
+void recievePacket(){
+  TelemetryPacket telem;
+  if (receiveTelemetry(telem)) {
+    Serial.println("RECEIVED DATA");
+  }
 }
 
 void setup1() {
@@ -80,6 +105,8 @@ void setup1() {
   // Clear screen and prepare for main HUD
   u8g2.clearBuffer();
   u8g2.sendBuffer();
+
+  recievePacket();
 }
 
 void loop1(){
@@ -90,6 +117,7 @@ void loop1(){
   drawSmileyFace();
   if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
   if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
+  commIsConnected() ? u8g2.drawStr(25,40,"ESTABLISHED") : u8g2.drawStr(25,40,"No Connection");
   
   u8g2.sendBuffer();
 };
