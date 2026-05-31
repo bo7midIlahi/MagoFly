@@ -190,7 +190,7 @@ void testDraw(uint8_t state) {
   }
 }
 
-void drawText(){
+void drawText(bool connected){
   u8g2.setFont(u8g2_font_squeezed_b7_tr);
   //THR
   u8g2.drawStr(75,10,"THR");
@@ -218,6 +218,8 @@ void drawText(){
     u8g2.drawStr(65,64,"RIGHT HANDED");
     u8g2.drawStr(0, 64, "v0.4");
   }
+
+  connected ? (u8g2.drawStr(25,40,"ESTABLISHED"), drawSmileyFace()) : (u8g2.drawStr(25,40,"No Connection"), drawSadFace());
   
 }
 
@@ -247,6 +249,13 @@ void drawSmileyFace() {
   u8g2.drawPixel(15, 40);
   u8g2.drawPixel(5, 40);
   u8g2.drawArc(10, 43, 6, 149, 236);
+}
+
+void drawSadFace() {
+  u8g2.drawCircle(10, 43, 10);
+  u8g2.drawPixel(15, 40);
+  u8g2.drawPixel(5, 40);
+  u8g2.drawArc(10, 51, 6, 25, 102);
 }
 
 void drawBlinkingLanding() {

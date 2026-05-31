@@ -27,6 +27,8 @@ Adafruit_ADS1115 ADS;  /* Use this for the 16-bit ADS1115 ADC */
 //Toggle Wsitch
 #define TOGGLE_SWITCH 27
 
+//define connection status
+#define CONNECTED false
 // One and only definition of userCollection
 struct Collection userCollection;
 
@@ -112,12 +114,12 @@ void setup1() {
 void loop1(){
   u8g2.clearBuffer();
 
-  drawText();
+  drawText(CONNECTED);
   drawValues(userCollection.roll, userCollection.pitch, userCollection.yaw, userCollection.throttle, CHECK_BIT(userCollection.FLAGS,1), CHECK_BIT(userCollection.FLAGS,2));
-  drawSmileyFace();
+  //drawSmileyFace();
   if (CHECK_BIT(userCollection.FLAGS,5)) drawBlinkingLanding();
   if (CHECK_BIT(userCollection.FLAGS,3)) drawEngineCut();
-  commIsConnected() ? u8g2.drawStr(25,40,"ESTABLISHED") : u8g2.drawStr(25,40,"No Connection");
+  commIsConnected() ? CONNECTED==true : CONNECTED==false;
   
   u8g2.sendBuffer();
 };
