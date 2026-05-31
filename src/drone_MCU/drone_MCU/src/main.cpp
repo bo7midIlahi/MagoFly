@@ -1,5 +1,6 @@
 #include <communication.h>
 #include <Servo.h>
+#include <motor.h>
 //defining pins of the ESCs
 #define ESC1_PIN 2
 #define ESC2_PIN 3
@@ -10,6 +11,9 @@ Servo ESC1;
 Servo ESC2; 
 Servo ESC3; 
 Servo ESC4;
+
+//define throt
+uint8_t THROTTLE;
 
 ControlPacket receivedCtrl;
 
@@ -33,7 +37,7 @@ void armESC() {
 }
 
 void calibrateAllESCs() {
-  Serial.println("⚠️  CALIBRATING ESCs – PROPS MUST BE OFF!");
+  Serial.println("CALIBRATING ESCs – PROPS MUST BE OFF!");
   delay(2000); // give time to read message
 
   // Step 1: Send maximum throttle (2000 µs)
@@ -59,9 +63,9 @@ void setup() {
   Serial.begin(115200);
   pinMode(16,OUTPUT);
   attach();
+  commBegin(CommRole::DRONE, "DroneRemote", "12345678");
   calibrateAllESCs();
   armESC();
-  commBegin(CommRole::DRONE, "DroneRemote", "12345678");
   Serial.printf("finished setup");
 }
 
@@ -80,6 +84,18 @@ void loop() {
     // Map received data to motor commands
     // receivedCtrl.roll, pitch, yaw, throttle, FLAGS, etc.
     //sio_hw->gpio_clr = (1 << 16);
+    THROTTLE = map(receivedCtrl.throttle,0,100,1000,2000);
+
+    setThrottle(THROTTLE);
+    if (receivedCtrl.pitch>30000) moveForward(THROTTLE);
+    if (receivedCtrl.pitch<100) moveForward(THROTTLE);
+    if (receivedCtrl.roll>30000) yawLeft(THROTTLE);
+    if (receivedCtrl.roll<100) rollRight(THROTTLE);
+    if (receivedCtrl.yaw>3000) yawLeft(THROTTLE);
+    if (receivedCtrl.pitch<100) yawRight(THROTTLE);
+    if (CHECK_BIT(receivedCtrl.FLAGS,3)) KILL_ENGINES();
+    if (CHECK_BIT(receivedCtrl.FLAGS,5)) returnToGround(THROTTLE);
+
     digitalWrite(16, LOW); 
     Serial.printf("ROLL: %d\tPITCH: %d\tYAW: %d\tTHROTTLE: %d\tALTITUTDE: %d",
       receivedCtrl.roll, receivedCtrl.pitch,
